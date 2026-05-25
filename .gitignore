@@ -1,0 +1,6 @@
+# rectal-cancer/ 는 별도의 독립 git 저장소(github.com/KANG-SURGERY/rectal-cancer)이다.
+# 이 hello-world 저장소가 임베디드 저장소(gitlink)로 잘못 추적하지 않도록 제외한다.
+rectal-cancer/
+
+# OS
+.DS_Store
