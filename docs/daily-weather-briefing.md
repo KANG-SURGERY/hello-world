@@ -31,6 +31,12 @@ Cron은 UTC로 해석되므로 KST 07:00은 전날 22:00 UTC에 해당한다. �
 주요 출처: 기상청 날씨누리(weather.go.kr), 국가태풍센터(typ.kma.go.kr),
 에어코리아(airkorea.or.kr), 국민재난안전포털.
 
+## 실시간 웹 앱
+
+같은 정보를 아무 때나 보려면 `docs/index.html`을 연다. 브라우저에서 직접
+Open-Meteo API를 호출하는 단일 파일 앱이며, 서버·빌드·API 키가 필요 없다.
+자세한 내용은 [`docs/weather-app.md`](weather-app.md) 참고.
+
 ## 운영
 
 - 목록 확인 / 수정 / 삭제: Claude에게 "기상 브리핑 Routine 확인(또는 시각 변경, 중단)"이라고
