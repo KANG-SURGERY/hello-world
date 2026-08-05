@@ -1,0 +1,67 @@
+# 정책 원장 (policy ledger)
+#
+# 각 대책을 자연어가 아니라 '레버 벡터'로 분해해 둡니다. 이 파일이 시스템의
+# 심장입니다 — 신규 정책의 효과 추정은 결국 "이 레버 조합과 과거 어떤 사례가
+# 유사한가"를 묻는 일이기 때문입니다.
+#
+# ⚠️ verified 플래그
+#   아래 항목들은 공개 자료 기억에 근거해 초안으로 채운 것이며 원문 대조를
+#   거치지 않았습니다. 실제 추정에 쓰기 전에 국토교통부 보도자료 원문으로
+#   대상 지역·시행일·수치를 확인하고 verified: true 로 바꾸세요.
+#   틀린 대상 지역 목록은 처치군을 오염시켜 추정치를 통째로 무의미하게 만듭니다.
+#
+# announced_date vs effective_date
+#   둘을 반드시 분리합니다. 시장은 발표 시점에 반응하고(예고효과), 시행일에
+#   다시 반응합니다. 이벤트 기준일을 어느 쪽으로 잡느냐에 따라 추정치가
+#   달라지므로 event_study 는 두 기준을 모두 돌려 비교할 수 있어야 합니다.
+
+policies:
+  - id: "2018-08-27"
+    name: "8·27 대책 (투기지역 추가지정)"
+    verified: false
+    source: "국토교통부 보도자료 2018-08-27 — 원문 대조 필요"
+    announced_date: "2018-08-27"
+    effective_date: "2018-08-28"
+    # 서울 내 일부 구만 지정 → 서울 안에서 처치군/대조군이 갈리는 드문 설계.
+    # 지역 고정효과가 흡수하지 못하는 광역 충격(금리 등)이 서울 전역에
+    # 공통으로 작용하므로 식별에 유리합니다.
+    treated_regions: ["11110", "11140", "11230", "11590"]  # 종로, 중, 동대문, 동작
+    levers:
+      speculation_zone_designation: true
+      ltv_cap: 0.40
+      dti_cap: 0.40
+      mortgage_count_restriction: true
+
+  - id: "2017-08-02"
+    name: "8·2 대책"
+    verified: false
+    source: "국토교통부 보도자료 2017-08-02 — 원문 대조 필요"
+    announced_date: "2017-08-02"
+    effective_date: "2017-08-03"
+    # 서울 25개 구 전역이 투기과열지구로 지정되어 서울 내 대조군이 없습니다.
+    # 경기/인천을 대조군으로 쓰면 풍선효과로 오염되므로, 이 사건은
+    # synthetic control 이나 원거리 광역시 대조군 설계가 필요합니다.
+    # event_study 의 within-Seoul 설계로는 식별 불가 — 의도적으로 남겨둔 반례.
+    treated_regions: "ALL_SEOUL"
+    levers:
+      speculation_overheated_zone: true
+      ltv_cap: 0.40
+      dti_cap: 0.40
+      capital_gains_tax_surcharge_multi_owner: true
+      resale_restriction_months: 60
+
+  - id: "2019-12-16"
+    name: "12·16 대책"
+    verified: false
+    source: "국토교통부 보도자료 2019-12-16 — 원문 대조 필요"
+    announced_date: "2019-12-16"
+    effective_date: "2019-12-17"
+    # 지역이 아니라 '가격 구간'을 기준으로 처치가 배정된 사례.
+    # 9억/15억 경계를 이용한 regression discontinuity 설계가 event study 보다
+    # 적합합니다 — 같은 구 안에서도 처치 여부가 갈리기 때문입니다.
+    treated_regions: "PRICE_BASED"
+    levers:
+      mortgage_ban_above_krw: 1_500_000_000
+      ltv_cap_above_900m: 0.20
+      ltv_cap_below_900m: 0.40
+      comprehensive_real_estate_tax_increase: true

@@ -1,0 +1,16 @@
+# 실거래가 원본은 커밋하지 않습니다 — 용량이 크고 재현 가능하며,
+# 재배포 조건이 제공기관 약관에 걸립니다. 폴더 구조만 추적합니다.
+data/raw/*
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+
+# 재생성 가능한 산출물
+results/figures/*.png
+results/*.csv
+!results/**/.gitkeep
+
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
