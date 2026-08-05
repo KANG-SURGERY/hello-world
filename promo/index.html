@@ -317,8 +317,10 @@ body.recording .controls,body.recording .hud{display:none}
 <div class="controls">
   <button id="play">▶ 재생</button>
   <button id="restart">↻ 처음부터</button>
+  <button id="mute">🔊 음악 켜짐</button>
+  <button id="save">⬇ 영상 파일로 저장 (소리 포함)</button>
   <button id="rec">🎬 녹화 모드 (UI 숨김 + 전체화면)</button>
-  <span class="hint">화면 녹화하면 그대로 60초 영상이 됩니다</span>
+  <span class="hint" id="hint">저장을 누르고 이 탭을 선택 · <b>탭 오디오도 공유</b>를 켜세요</span>
 </div>
 
 <script>
@@ -350,6 +352,162 @@ body.recording .controls,body.recording .hud{display:none}
   // stagger the COREAN letters relative to their scene start
   document.querySelectorAll('#s3 .wordmark span')
     .forEach((el, i) => el.style.animationDelay = (3.4 + i * 0.22) + 's');
+
+  /* ==========================================================
+     Score — synthesised in the browser with the Web Audio API.
+     No audio files, no licensing: the notes below ARE the music.
+     Harmony follows the film: Am (diagnosis) → F (the lift) →
+     C/Am/F (warmth) → G-Am-F-C (build) → C (resolve).
+     ========================================================== */
+  const SEMI = {C:0,'C#':1,D:2,'D#':3,E:4,F:5,'F#':6,G:7,'G#':8,A:9,'A#':10,B:11};
+  const hz = name => {
+    const [, step, oct] = name.match(/^([A-G]#?)(-?\d)$/);
+    return 440 * Math.pow(2, (SEMI[step] + (+oct + 1) * 12 - 69) / 12);
+  };
+
+  let audio = null, muted = false;
+
+  // A short noise burst with an exponential tail makes a serviceable hall.
+  function impulse(ctx, secs) {
+    const len = Math.floor(ctx.sampleRate * secs);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+    }
+    const conv = ctx.createConvolver();
+    conv.buffer = buf;
+    return conv;
+  }
+
+  // felt-piano-ish: sine body + quiet triangle transient, lowpassed, long decay
+  function key(name, at, dur = 3.4, vel = 0.42) {
+    const { ctx, dry, rev, t0 } = audio;
+    const t = t0 + at, f = hz(name);
+    const filt = ctx.createBiquadFilter();
+    filt.type = 'lowpass';
+    filt.frequency.value = Math.min(7000, f * 7);
+    filt.Q.value = 0.4;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vel, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    const body = ctx.createOscillator(); body.type = 'sine'; body.frequency.value = f;
+    const tine = ctx.createOscillator(); tine.type = 'triangle'; tine.frequency.value = f;
+    const tineG = ctx.createGain(); tineG.gain.value = 0.2;
+    body.connect(filt); tine.connect(tineG); tineG.connect(filt);
+    filt.connect(g); g.connect(dry); g.connect(rev);
+    body.start(t); tine.start(t);
+    body.stop(t + dur + 0.1); tine.stop(t + dur + 0.1);
+  }
+
+  // sustained string-pad chord, slow swell, sits far under the piano
+  function pad(names, at, dur, vel = 0.075) {
+    const { ctx, dry, rev, t0 } = audio;
+    const t = t0 + at;
+    for (const name of names) {
+      for (const detune of [-5, 5]) {
+        const o = ctx.createOscillator();
+        o.type = 'sine'; o.frequency.value = hz(name); o.detune.value = detune;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vel, t + 1.9);
+        g.gain.setValueAtTime(vel, Math.max(t + 2.0, t + dur - 2.2));
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(dry); g.connect(rev);
+        o.start(t); o.stop(t + dur + 0.1);
+      }
+    }
+  }
+
+  function scheduleScore() {
+    // ── 0-7s · the diagnosis: sparse, low, unresolved (Am)
+    pad(['A3','E4'], 0.2, 7.4, 0.055);
+    key('A2', 0.3, 5.0, 0.34); key('C4', 2.6, 4.0, 0.30);
+    key('E4', 4.4, 3.6, 0.26); key('A3', 6.0, 3.4, 0.24);
+
+    // ── 7-14s · the turn: F major opens it up
+    pad(['F3','A3','C4'], 7.0, 7.4);
+    key('F2', 7.0, 5.0, 0.36); key('C4', 7.5, 3.4);
+    key('F4', 8.9, 3.4); key('A4', 10.3, 3.8, 0.46);
+    key('G4', 12.0, 3.0, 0.34); key('E4', 13.0, 3.0, 0.30);
+
+    // ── 14-24s · who: settled, warm (C - Am - F)
+    pad(['C4','E4','G4'], 14.0, 4.0);
+    key('C3', 14.0, 4.4, 0.34); key('G4', 14.5, 3.0); key('E4', 15.3, 3.0); key('C5', 16.1, 3.2);
+    pad(['A3','C4','E4'], 17.5, 4.0);
+    key('A2', 17.5, 4.4, 0.34); key('E4', 18.0, 3.0); key('C5', 18.8, 3.0); key('A4', 19.6, 3.2);
+    pad(['F3','A3','C4'], 21.0, 4.0);
+    key('F2', 21.0, 4.4, 0.34); key('C5', 21.5, 3.0); key('A4', 22.3, 3.0); key('F4', 23.1, 3.2);
+
+    // ── 24-36s · the evidence builds (G - Am - F - C - G)
+    pad(['G3','B3','D4'], 24.0, 3.0);
+    key('G2', 24.0, 3.4, 0.36); key('D5', 24.1, 2.6); key('B4', 24.7, 2.6); key('G4', 25.3, 2.6); key('D5', 25.9, 2.6);
+    pad(['A3','C4','E4'], 26.5, 3.0);
+    key('A2', 26.5, 3.4, 0.36); key('E5', 26.6, 2.6); key('C5', 27.2, 2.6); key('A4', 27.8, 2.6); key('E5', 28.4, 2.6);
+    pad(['F3','A3','C4'], 29.0, 3.0);
+    key('F2', 29.0, 3.4, 0.36); key('C5', 29.1, 2.6); key('A4', 29.7, 2.6); key('F4', 30.3, 2.6); key('C5', 30.9, 2.6);
+    pad(['C4','E4','G4'], 31.5, 3.0);
+    key('C3', 31.5, 3.4, 0.36); key('G4', 31.6, 2.6); key('E5', 32.2, 2.6); key('C5', 32.8, 2.6); key('G4', 33.4, 2.6);
+    pad(['G3','B3','D4'], 34.0, 2.6);
+    key('G2', 34.0, 3.0, 0.38); key('D5', 34.1, 2.4); key('B4', 34.7, 2.4); key('D5', 35.3, 2.4); key('G5', 35.7, 2.8, 0.46);
+
+    // ── 36-48s · the numbers: brightest, confident (C - G - Am - F - C)
+    pad(['C4','E4','G4'], 36.0, 3.0);
+    key('C3', 36.0, 3.6, 0.38); key('C5', 36.1, 3.0); key('E5', 36.9, 3.0); key('G5', 37.7, 3.2, 0.46);
+    pad(['G3','B3','D4'], 38.5, 3.0);
+    key('G2', 38.5, 3.6, 0.38); key('D5', 38.6, 3.0); key('B4', 39.4, 3.0); key('G5', 40.2, 3.2, 0.44);
+    pad(['A3','C4','E4'], 41.0, 3.0);
+    key('A2', 41.0, 3.6, 0.38); key('E5', 41.1, 3.0); key('C5', 41.9, 3.0); key('A4', 42.7, 3.2);
+    pad(['F3','A3','C4'], 43.5, 3.0);
+    key('F2', 43.5, 3.6, 0.38); key('C5', 43.6, 3.0); key('A4', 44.4, 3.0); key('F5', 45.2, 3.2, 0.44);
+    pad(['C4','E4','G4'], 46.0, 2.6);
+    key('C3', 46.0, 3.4, 0.36); key('G4', 46.1, 2.8); key('C5', 46.9, 2.8); key('E5', 47.5, 3.0);
+
+    // ── 48-55.5s · after the surgery: softens (F - C)
+    pad(['F3','A3','C4'], 48.0, 4.6);
+    key('F2', 48.0, 5.0, 0.32); key('A4', 48.5, 3.6, 0.36);
+    key('C5', 49.7, 3.6, 0.34); key('F4', 51.0, 3.4, 0.30);
+    pad(['C4','E4','G4'], 52.0, 4.2);
+    key('C3', 52.0, 4.6, 0.32); key('E5', 52.5, 3.6, 0.34);
+    key('G4', 53.7, 3.4, 0.30); key('C5', 54.7, 3.4, 0.30);
+
+    // ── 55.5-60s · resolve and let it ring out
+    pad(['C4','E4','G4','C5'], 55.5, 5.5, 0.085);
+    key('C2', 55.5, 6.0, 0.34); key('C3', 55.6, 6.0, 0.28);
+    key('G4', 56.1, 4.5, 0.30); key('E5', 57.3, 4.0, 0.26); key('C5', 58.4, 3.6, 0.20);
+
+    // final fade so the recording ends clean
+    const { master, t0 } = audio;
+    master.gain.setValueAtTime(0.9, t0 + 58.2);
+    master.gain.exponentialRampToValueAtTime(0.0001, t0 + 60.4);
+  }
+
+  function audioStart() {
+    audioStop();
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    // mute lives on its own node so toggling it never fights the scheduled fade
+    const out = ctx.createGain();
+    out.gain.value = muted ? 0.0001 : 1;
+    out.connect(ctx.destination);
+    const master = ctx.createGain(); master.gain.value = 0.9; master.connect(out);
+    const dry = ctx.createGain(); dry.gain.value = 0.8; dry.connect(master);
+    const wet = ctx.createGain(); wet.gain.value = 0.38; wet.connect(master);
+    const rev = impulse(ctx, 2.8); rev.connect(wet);
+    audio = { ctx, out, master, dry, rev, t0: ctx.currentTime + 0.15 };
+    scheduleScore();
+    ctx.resume?.();
+  }
+  // Suspending freezes the context clock, so every scheduled note stays in sync.
+  const audioPause  = () => audio?.ctx.suspend?.();
+  const audioResume = () => audio?.ctx.resume?.();
+  function audioStop() {
+    if (!audio) return;
+    audio.ctx.close?.();
+    audio = null;
+  }
 
   let t = 0, playing = false, last = 0, current = -1;
 
@@ -395,12 +553,18 @@ body.recording .controls,body.recording .hud{display:none}
     requestAnimationFrame(tick);
   }
 
+  function rewind() {
+    t = 0; current = -1;
+    SCENES.forEach(s => s.node.classList.remove('on'));
+  }
   function play() {
     if (playing) return;
-    if (t >= DURATION) t = 0;
+    const fromTop = t >= DURATION;
+    if (fromTop) rewind();
     playing = true;
     stage.classList.remove('paused');
     playBtn.textContent = '❚❚ 일시정지';
+    if (!audio || fromTop) audioStart(); else audioResume();
     last = performance.now();
     requestAnimationFrame(tick);
   }
@@ -408,16 +572,25 @@ body.recording .controls,body.recording .hud{display:none}
     playing = false;
     stage.classList.add('paused');
     playBtn.textContent = t >= DURATION ? '▶ 다시 재생' : '▶ 재생';
+    audioPause();
   }
   function restart() {
-    pause(); t = 0; current = -1;
-    SCENES.forEach(s => s.node.classList.remove('on'));
+    pause();
+    audioStop();
+    rewind();
     render();
     play();
   }
 
   playBtn.addEventListener('click', () => playing ? pause() : play());
   document.getElementById('restart').addEventListener('click', restart);
+
+  const muteBtn = document.getElementById('mute');
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇 음악 꺼짐' : '🔊 음악 켜짐';
+    if (audio) audio.out.gain.setTargetAtTime(muted ? 0.0001 : 1, audio.ctx.currentTime, 0.04);
+  });
   document.getElementById('rec').addEventListener('click', () => {
     document.body.classList.add('recording');
     const done = () => { if (!document.fullscreenElement) {
@@ -429,6 +602,55 @@ body.recording .controls,body.recording .hud{display:none}
       .then(() => setTimeout(restart, 500))
       .catch(() => restart());
   });
+  /* Screen-recorder utilities capture the mic, not the tab, so the generated
+     score would be missing from the file. getDisplayMedia with audio:true
+     records picture and tab sound together. */
+  const saveBtn = document.getElementById('save');
+  const hint = document.getElementById('hint');
+  const SAVE_LABEL = '⬇ 영상 파일로 저장 (소리 포함)';
+
+  async function saveFilm() {
+    if (!navigator.mediaDevices?.getDisplayMedia || !window.MediaRecorder) {
+      hint.textContent = '이 브라우저는 저장을 지원하지 않습니다. Chrome을 써주세요.';
+      return;
+    }
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: 30 }, audio: true, preferCurrentTab: true,
+      });
+    } catch {
+      hint.textContent = '저장이 취소됐습니다. 다시 누르면 됩니다.';
+      return;
+    }
+    if (!stream.getAudioTracks().length) {
+      hint.textContent = '소리 없이 녹화됩니다 — 다시 눌러 “탭 오디오도 공유”를 켜주세요.';
+    }
+    const mime = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+      .find(m => MediaRecorder.isTypeSupported(m));
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8e6 });
+    const chunks = [];
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    rec.onstop = () => {
+      stream.getTracks().forEach(tr => tr.stop());
+      const url = URL.createObjectURL(new Blob(chunks, { type: mime }));
+      const a = document.createElement('a');
+      a.href = url; a.download = 'promo-60s.webm'; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      document.body.classList.remove('recording');
+      saveBtn.disabled = false; saveBtn.textContent = SAVE_LABEL;
+      hint.textContent = '저장 완료 — promo-60s.webm';
+    };
+    document.body.classList.add('recording');
+    saveBtn.disabled = true; saveBtn.textContent = '● 녹화 중… 60초';
+    restart();
+    rec.start();
+    const stop = () => rec.state !== 'inactive' && rec.stop();
+    setTimeout(stop, (DURATION + 1.4) * 1000);
+    stream.getVideoTracks()[0].addEventListener('ended', stop); // user hit "공유 중지"
+  }
+  saveBtn.addEventListener('click', saveFilm);
+
   document.addEventListener('keydown', e => {
     if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
     if (e.key === 'r' || e.key === 'R') restart();
