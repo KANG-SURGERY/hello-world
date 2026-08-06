@@ -1,0 +1,583 @@
+<title>팔월 열닷새 — 결혼 33주년</title>
+
+<style>
+  :root {
+    /* 여름 — 팔월 저녁의 종이 */
+    --ground:      #EFEBE3;
+    --ground-2:    #E7E2D8;
+    --ink:         #1B2530;   /* 겨울의 잉크를 여름 종이 위에 */
+    --ink-soft:    #4A5764;
+    --ink-faint:   #8B95A0;
+    --rule:        #CFC8BB;
+    --accent:      #B77524;   /* 현관 등 — 기다리던 불빛 */
+    --accent-soft: #D9A05A;
+    --glow:        rgba(183, 117, 36, 0.13);
+
+    --serif: "Nanum Myeongjo", AppleMyungjo, "Apple Myungjo", "Noto Serif KR",
+             "Source Han Serif K", "본명조", Batang, "바탕", Georgia, serif;
+    --sans:  Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic",
+             "맑은 고딕", system-ui, sans-serif;
+    --mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+    --measure: 34rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* 겨울 — 김 서린 창 너머의 밤 */
+      --ground:      #0C1520;
+      --ground-2:    #101B27;
+      --ink:         #DDE4EA;
+      --ink-soft:    #9DAAB6;
+      --ink-faint:   #6B7986;
+      --rule:        #23303D;
+      --accent:      #E3A44F;
+      --accent-soft: #8A6A3A;
+      --glow:        rgba(227, 164, 79, 0.16);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0C1520;
+    --ground-2:    #101B27;
+    --ink:         #DDE4EA;
+    --ink-soft:    #9DAAB6;
+    --ink-faint:   #6B7986;
+    --rule:        #23303D;
+    --accent:      #E3A44F;
+    --accent-soft: #8A6A3A;
+    --glow:        rgba(227, 164, 79, 0.16);
+  }
+
+  :root[data-theme="light"] {
+    --ground:      #EFEBE3;
+    --ground-2:    #E7E2D8;
+    --ink:         #1B2530;
+    --ink-soft:    #4A5764;
+    --ink-faint:   #8B95A0;
+    --rule:        #CFC8BB;
+    --accent:      #B77524;
+    --accent-soft: #D9A05A;
+    --glow:        rgba(183, 117, 36, 0.13);
+  }
+
+  body {
+    background:
+      radial-gradient(120% 60% at 50% -10%, var(--ground-2) 0%, var(--ground) 62%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--serif);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .sheet {
+    width: min(100% - 2.5rem, 46rem);
+    margin-inline: auto;
+    padding-block: clamp(3.5rem, 12vh, 7rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3rem, 7vh, 4.5rem);
+  }
+
+  /* ── 표제 ─────────────────────────────────────────── */
+
+  .masthead { display: flex; flex-direction: column; gap: 1.6rem; }
+
+  .eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow .span { font-variant-numeric: tabular-nums; }
+
+  .title-wrap { position: relative; padding-block: clamp(1rem, 4vh, 2.4rem); }
+
+  .title-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -30% -25% -40% -20%;
+    background: radial-gradient(50% 50% at 30% 55%, var(--glow) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  h1 {
+    font-size: clamp(2.7rem, 10vw, 4.4rem);
+    font-weight: 400;
+    line-height: 1.16;
+    letter-spacing: 0.12em;
+    text-wrap: balance;
+    animation: clearing 2s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  @keyframes clearing {
+    from { opacity: 0; filter: blur(16px); letter-spacing: 0.3em; }
+    to   { opacity: 1; filter: blur(0);    letter-spacing: 0.12em; }
+  }
+
+  .dedication {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--ink-soft);
+  }
+  .dedication .to {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+
+  /* ── 가사 ─────────────────────────────────────────── */
+
+  .lyrics { display: flex; flex-direction: column; gap: clamp(2.2rem, 5vh, 3.2rem); }
+
+  .block {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, var(--measure));
+    gap: 0 2.25rem;
+  }
+
+  .mark {
+    align-self: start;
+    padding-top: 0.7em;
+    text-align: right;
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    line-height: 1.5;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .mark em {
+    display: block;
+    font-style: normal;
+    letter-spacing: 0.1em;
+    color: var(--accent-soft);
+  }
+
+  .lines { display: flex; flex-direction: column; gap: 1.35em; }
+  .stanza { font-size: clamp(1.05rem, 2.6vw, 1.16rem); line-height: 1.95; }
+  .stanza p { margin: 0; }
+
+  .spoken { color: var(--ink-soft); font-style: italic; }
+
+  .signature {
+    grid-column: 2;
+    padding-top: 0.5rem;
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+  }
+
+  /* ── 카드용 4행 ───────────────────────────────────── */
+
+  .card-four {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    padding: clamp(1.75rem, 4vw, 2.5rem) clamp(1.5rem, 4vw, 2.75rem);
+    background: var(--ground-2);
+    border-top: 2px solid var(--accent);
+  }
+  .card-four h2 {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+  .card-four .verse {
+    font-size: clamp(1.02rem, 2.5vw, 1.12rem);
+    line-height: 2.05;
+    max-width: var(--measure);
+  }
+  .card-four .verse p { margin: 0; }
+
+  /* ── 연표 ─────────────────────────────────────────── */
+
+  .timeline { display: flex; flex-direction: column; gap: 1.5rem; }
+  .timeline h2 {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+  .timeline ol {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid var(--rule);
+  }
+  .timeline li {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 0.2rem 1.5rem;
+    align-items: baseline;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  .timeline li::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: 0.62em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translateX(-2.5px);
+  }
+  .timeline .when {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+  .timeline .what { font-size: 1rem; line-height: 1.7; color: var(--ink-soft); }
+
+  /* ── 부록 ─────────────────────────────────────────── */
+
+  .annex {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--sans);
+  }
+  .annex h2 {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+  .annex h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    padding-bottom: 0.75rem;
+  }
+  .annex section { display: flex; flex-direction: column; }
+
+  .specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1.25rem 1.5rem;
+  }
+  .specs div { display: flex; flex-direction: column; gap: 0.3rem; }
+  .specs dt {
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    color: var(--ink-faint);
+  }
+  .specs dd {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chords { overflow-x: auto; }
+  .chords pre {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.95;
+    color: var(--ink-soft);
+    white-space: pre;
+  }
+  .chords b { color: var(--accent); font-weight: 400; }
+
+  .annex ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: var(--measure);
+  }
+  .annex li { padding-left: 1rem; text-indent: -1rem; }
+  .annex li::before { content: "— "; color: var(--accent-soft); }
+
+  .colophon {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    line-height: 1.8;
+    color: var(--ink-faint);
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* ── 좁은 화면 ────────────────────────────────────── */
+
+  @media (max-width: 40rem) {
+    .block { grid-template-columns: minmax(0, 1fr); gap: 0.6rem 0; }
+    .mark { text-align: left; padding-top: 0; }
+    .mark em { display: inline; padding-left: 0.5rem; }
+    .signature { grid-column: 1; }
+    .timeline li { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    h1 { animation: none; }
+  }
+
+  /* ── 인쇄 — 액자용 ────────────────────────────────── */
+
+  @media print {
+    :root {
+      --ground: #FFFFFF; --ground-2: #FFFFFF;
+      --ink: #000000; --ink-soft: #333333; --ink-faint: #666666;
+      --rule: #CCCCCC; --accent: #8A5A1C; --accent-soft: #8A5A1C;
+      --glow: transparent;
+    }
+    @page { margin: 20mm; }
+    body { background: #FFFFFF; }
+    .sheet { width: 100%; padding-block: 0; gap: 2.5rem; }
+    h1 { animation: none; }
+    .title-wrap::before { display: none; }
+    .block, .card-four, .timeline li { break-inside: avoid; }
+    .annex { break-before: page; }
+  }
+</style>
+
+<article class="sheet">
+
+  <header class="masthead">
+    <p class="eyebrow">
+      <span>결혼 33주년</span>
+      <span class="span">1993 · 8 · 15 &nbsp;—&nbsp; 2026 · 8 · 15</span>
+    </p>
+
+    <div class="title-wrap">
+      <h1>팔월 열닷새</h1>
+    </div>
+
+    <p class="dedication">
+      <span class="to">여보에게</span>
+      <span>아내에게 바치는 애모곡</span>
+    </p>
+  </header>
+
+  <section class="lyrics">
+
+    <div class="block">
+      <p class="mark">1절</p>
+      <div class="lines">
+        <div class="stanza">
+          <p>그해 겨울, 청담동 그 골목</p>
+          <p>유리창에 입김이 서리던 작은 카페</p>
+          <p>여명의 눈동자가 안방을 적시던 시절</p>
+          <p>나는 그 겨울에 당신을 처음 봤지</p>
+        </div>
+        <div class="stanza">
+          <p>식어가는 찻잔보다 따뜻하게 웃던</p>
+          <p>서른다섯 해 전, 그 겨울의 당신</p>
+        </div>
+        <div class="stanza">
+          <p>돌아서던 골목, 공중전화 앞에 서서</p>
+          <p>동전을 세며 그 하루를 다시 살았어</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">받는줄</p>
+      <div class="lines">
+        <div class="stanza">
+          <p>그렇게 두 번의 겨울을 건너와서</p>
+          <p>팔월 열닷새, 우리가 되었지</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">후렴</p>
+      <div class="lines">
+        <div class="stanza">
+          <p>사랑한다는 말이 닳아버릴까 봐</p>
+          <p>아껴만 두었던 마음, 오늘은 다 꺼낼게요</p>
+          <p>팔월 열닷새, 우리가 시작된 날</p>
+          <p>당신은 내 생에서 가장 긴 노래</p>
+          <p>아직도 다 못 부른, 나의 노래</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">2절</p>
+      <div class="lines">
+        <div class="stanza">
+          <p>불 꺼진 복도를 지나 돌아오던 밤</p>
+          <p>현관 등 하나가 늘 나를 기다렸지</p>
+          <p>늦어서 미안하다는 말보다 먼저</p>
+          <p>당신 손이 내 어깨를 감싸주었네</p>
+        </div>
+        <div class="stanza">
+          <p>내가 지킨 것들을 세상은 알아도</p>
+          <p>나를 지킨 사람은 당신 하나뿐</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">받는줄</p>
+      <div class="lines">
+        <div class="stanza">
+          <p>서른세 번의 여름이 지나가도</p>
+          <p>같은 자리에 함께 있는 사람</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">후렴 <em>반복</em></p>
+      <div class="lines">
+        <div class="stanza">
+          <p>사랑한다는 말이 닳아버릴까 봐</p>
+          <p>아껴만 두었던 마음, 오늘은 다 꺼낼게요</p>
+          <p>팔월 열닷새, 우리가 시작된 날</p>
+          <p>당신은 내 생에서 가장 긴 노래</p>
+          <p>아직도 다 못 부른, 나의 노래</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">브릿지</p>
+      <div class="lines">
+        <div class="stanza">
+          <p>흰머리 한 올도 훈장 같아서</p>
+          <p>주름진 그 손등에 입을 맞춰요</p>
+          <p>잘한 것도 못한 것도 다 내 것인데</p>
+          <p>당신은 좋은 것만 기억해 주었지</p>
+        </div>
+        <div class="stanza">
+          <p>다시 태어나도, 다시 그 겨울이 와도</p>
+          <p>나는 또 청담동 그 골목에서 당신을 기다릴게</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">마지막 후렴</p>
+      <div class="lines">
+        <div class="stanza">
+          <p>사랑한다는 말, 이제는 아끼지 않을게</p>
+          <p>남은 계절 전부 당신 편에 서서 부를게</p>
+          <p>서른세 번째 팔월, 우리가 시작된 날</p>
+          <p>당신은 내 생에서 가장 긴 노래</p>
+          <p>끝까지 함께 부르고 싶은 노래</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">맺음 <em>말로</em></p>
+      <div class="lines">
+        <div class="stanza spoken">
+          <p>여보, 고마워요</p>
+          <p>오래오래 내 곁에 있어줘요</p>
+        </div>
+      </div>
+      <p class="signature">1991년 겨울부터, 당신의 남편</p>
+    </div>
+
+  </section>
+
+  <section class="card-four">
+    <h2>카드에 옮겨 적을 네 줄</h2>
+    <div class="verse">
+      <p>여명의 눈동자가 흐르던 그해 겨울,</p>
+      <p>청담동 김 서린 창가에서 시작된 사람</p>
+      <p>두 번의 겨울을 건너, 서른세 번의 여름을</p>
+      <p>나는 당신과 살았습니다</p>
+      <p>사랑한다는 말이 닳을까 아껴만 두었는데</p>
+      <p>오늘은 다 꺼내어 당신께 드립니다</p>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <h2>연표</h2>
+    <ol>
+      <li>
+        <span class="when">1991년 겨울</span>
+        <span class="what">청담동 카페에서 처음 만남</span>
+      </li>
+      <li>
+        <span class="when">1993 · 8 · 15</span>
+        <span class="what">결혼</span>
+      </li>
+      <li>
+        <span class="when">2026 · 8 · 15</span>
+        <span class="what">서른세 번째 팔월 — 이 노래</span>
+      </li>
+    </ol>
+  </section>
+
+  <section class="annex">
+    <h2>부록 — 노래하는 법</h2>
+
+    <section>
+      <h3>곡 정보</h3>
+      <dl class="specs">
+        <div><dt>조성</dt><dd>C major</dd></div>
+        <div><dt>빠르기</dt><dd>♩ = 68</dd></div>
+        <div><dt>박자</dt><dd>6/8 또는 느린 4/4</dd></div>
+        <div><dt>길이</dt><dd>약 3분 40초</dd></div>
+        <div><dt>편성</dt><dd>기타 또는 피아노 한 대</dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h3>코드 진행</h3>
+      <div class="chords">
+<pre>절       C  -  G/B  -  Am  -  Em/G   |   F  -  C/E  -  Dm7  -  G
+받는줄   F  -  G    -  Em  -  Am     |   F  -  G    -  C
+후렴     C  -  G    -  Am  -  F      |   C  -  G    -  F    -  G
+         마지막 줄만   F  -  <b>Fm</b>  -  C
+브릿지   Am -  Em   -  F   -  C      |   F  -  G    -  C    -  <b>C7</b>
+맺음     F  -  C/E  -  Dm7 -  G      |   C</pre>
+      </div>
+    </section>
+
+    <section>
+      <h3>부를 때</h3>
+      <ul>
+        <li>후렴 끝의 <b>F → Fm → C</b>가 이 노래의 감정 축입니다. 그 자리에서 마음이 한 번 내려앉습니다.</li>
+        <li>브릿지 끝의 <b>C7</b>은 마지막 후렴으로 가는 문입니다. 힘을 주고 싶으면 여기서 한 키 올리세요.</li>
+        <li>1절은 노래하기보다 말하듯이. 잘 부르려 하지 않는 편이 낫습니다.</li>
+        <li>“그렇게 두 번의 겨울을 건너와서”는 한 호흡에 붙여서, 서두르지 말고.</li>
+        <li>브릿지의 “다시 태어나도”에서 처음으로 목소리를 여세요. 그 전까지는 참는 게 좋습니다.</li>
+        <li>맺음 두 줄은 노래하지 말고 그냥 말해주세요. 반주만 남기면 됩니다.</li>
+      </ul>
+    </section>
+
+    <p class="colophon">
+      인쇄하면 가사만 한 장으로 나옵니다. 부록은 다음 장으로 넘어갑니다.
+    </p>
+  </section>
+
+</article>
