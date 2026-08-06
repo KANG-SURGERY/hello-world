@@ -141,6 +141,73 @@
     color: var(--accent);
   }
 
+  /* ── 재생 ─────────────────────────────────────────── */
+
+  .player {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--rule);
+    font-family: var(--sans);
+  }
+  .player[hidden] { display: none; }
+
+  .player-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+
+  .player-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1.6rem;
+  }
+
+  .player button {
+    font-family: inherit;
+    font-size: 0.86rem;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--accent);
+    padding: 0.15rem 0;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .player button:hover:not(:disabled) { color: var(--accent); }
+  .player button:disabled {
+    color: var(--ink-faint);
+    border-bottom-color: var(--rule);
+    cursor: default;
+  }
+  .player button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  .clock {
+    margin-left: auto;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-faint);
+  }
+
+  .bar { height: 1px; background: var(--rule); position: relative; overflow: hidden; }
+  .bar span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    background: var(--accent);
+  }
+
+  .player-note { font-size: 0.76rem; line-height: 1.75; color: var(--ink-faint); }
+
+  .stanza p.now { color: var(--accent); }
+
   /* ── 가사 ─────────────────────────────────────────── */
 
   .lyrics { display: flex; flex-direction: column; gap: clamp(2.2rem, 5vh, 3.2rem); }
@@ -356,6 +423,8 @@
     @page { margin: 20mm; }
     body { background: #FFFFFF; }
     .sheet { width: 100%; padding-block: 0; gap: 2.5rem; }
+    .player { display: none !important; }
+    .stanza p.now { color: #000000; }
     h1 { animation: none; }
     .title-wrap::before { display: none; }
     .block, .card-four, .timeline li { break-inside: avoid; }
@@ -379,6 +448,21 @@
       <span class="to">여보에게</span>
       <span>아내에게 바치는 애모곡</span>
     </p>
+
+    <div class="player" hidden>
+      <p class="player-label">들어보기</p>
+      <div class="player-row">
+        <button type="button" data-act="all">처음부터</button>
+        <button type="button" data-act="chorus">후렴만</button>
+        <button type="button" data-act="stop" disabled>정지</button>
+        <span class="clock">0:00</span>
+      </div>
+      <div class="bar"><span></span></div>
+      <p class="player-note">
+        피아노 소리로 멜로디와 반주만 들려드립니다. 노랫말은 당신 목소리로 얹으세요.
+        재생하는 동안 지금 부르는 줄에 불이 들어옵니다.
+      </p>
+    </div>
   </header>
 
   <section class="lyrics">
@@ -581,3 +665,299 @@
   </section>
 
 </article>
+
+<script id="score" type="application/json">
+{
+  "bpm": 76,
+  "voicings": {
+    "C":   [48, 55, 60, 64],
+    "G":   [43, 50, 59, 62],
+    "G/B": [47, 55, 59, 62],
+    "Am":  [45, 52, 60, 64],
+    "Em":  [40, 52, 55, 59],
+    "Em/G":[43, 55, 59, 64],
+    "F":   [41, 53, 57, 60],
+    "C/E": [40, 55, 60, 64],
+    "Dm7": [38, 53, 57, 60],
+    "Fm":  [41, 53, 56, 60],
+    "C7":  [48, 55, 58, 64]
+  },
+  "mel": {
+    "V1": [[64,0.75],[64,0.75],[67,1],[64,1.5],[62,0.5],[64,0.5],[67,0.5],[62,0.5],[59,1],[59,1]],
+    "V2": [[64,0.5],[64,0.5],[69,0.5],[69,0.5],[67,0.5],[64,0.5],[60,1],[64,0.5],[67,0.5],[64,0.5],[62,0.5],[59,0.5],[67,1],[64,0.5]],
+    "V3": [[65,0.5],[69,0.5],[69,0.5],[67,0.5],[65,0.5],[65,0.5],[69,1],[67,0.5],[64,0.5],[67,0.5],[64,0.5],[60,0.5],[64,0.5],[67,0.5],[64,0.5]],
+    "V4": [[62,0.5],[65,0.5],[69,0.5],[69,0.5],[67,0.5],[65,1.5],[67,0.5],[69,0.5],[67,0.5],[64,0.5],[62,0.5],[62,0.5],[59,1]],
+    "P1": [[69,0.5],[69,0.5],[72,0.5],[69,0.5],[67,0.5],[69,1.5],[71,0.5],[74,0.5],[71,0.5],[67,0.5],[69,0.5],[71,0.5],[67,1]],
+    "P2": [[64,0.5],[67,0.5],[71,0.5],[69,0.5],[69,0.5],[72,0.5],[69,0.5],[64,0.5],[69,0.5],[67,0.5],[65,1],[0,2]],
+    "C1": [[67,0.5],[67,0.5],[69,0.5],[67,0.5],[64,0.5],[62,0.5],[64,1],[67,0.5],[69,0.5],[71,0.5],[69,0.5],[67,0.5],[62,1.5]],
+    "C2": [[69,0.5],[72,0.5],[69,0.5],[69,0.5],[67,0.5],[64,0.5],[69,0.5],[69,0.5],[69,0.5],[72,0.5],[69,0.5],[65,0.5],[69,0.5],[67,0.5],[65,0.5],[65,0.5]],
+    "C3": [[72,1],[72,0.5],[71,0.5],[69,0.5],[67,1.5],[69,0.5],[71,0.5],[69,0.5],[67,0.5],[69,0.5],[67,0.5],[62,1]],
+    "C4": [[65,0.5],[69,0.5],[72,0.5],[72,0.5],[69,0.5],[67,0.5],[65,1],[67,0.5],[69,0.5],[71,1],[74,1],[71,1]],
+    "C5": [[69,0.5],[69,0.5],[67,0.5],[65,0.5],[68,0.5],[68,0.5],[65,1],[64,0.5],[67,0.5],[64,1],[60,2]],
+    "B1": [[64,0.5],[69,0.5],[69,0.5],[67,0.5],[64,0.5],[69,1.5],[64,0.5],[67,0.5],[71,0.5],[67,0.5],[64,2]],
+    "B2": [[65,0.5],[69,0.5],[69,0.5],[67,0.5],[65,0.5],[69,0.5],[72,1],[72,0.5],[71,0.5],[67,0.5],[64,0.5],[67,2]],
+    "B3": [[65,0.5],[65,0.5],[69,0.5],[69,0.5],[67,0.5],[67,0.5],[69,0.5],[72,0.5],[72,0.5],[71,0.5],[69,0.5],[67,0.5],[74,2]],
+    "B4": [[64,0.5],[67,0.5],[72,0.5],[72,0.5],[71,0.5],[69,0.5],[67,1],[69,0.5],[67,0.5],[64,0.5],[67,0.5],[64,0.5],[60,1.5]],
+    "B5": [[69,0.5],[72,0.5],[74,0.5],[74,0.5],[72,0.5],[69,1.5],[71,0.5],[74,0.5],[74,0.5],[71,0.5],[69,0.5],[71,0.5],[74,0.5],[74,0.5]],
+    "B6": [[76,0.5],[76,0.5],[74,0.5],[72,0.5],[69,0.5],[72,0.5],[69,0.5],[64,0.5],[62,0.5],[64,0.5],[67,0.5],[69,0.5],[71,0.5],[67,0.5],[69,0.25],[71,0.25],[74,0.25],[74,0.25]],
+    "R":  [[0,8]]
+  },
+  "intro": [["C",4],["C",4]],
+  "coda":  [["C",4],["C",4]],
+  "chorus": [10, 14],
+  "lines": [
+    {"m":"V1","b":[["C",4],["G/B",4]]},
+    {"m":"V2","b":[["Am",4],["Em/G",4]]},
+    {"m":"V3","b":[["F",4],["C/E",4]]},
+    {"m":"V4","b":[["Dm7",4],["G",4]]},
+    {"m":"V1","b":[["C",4],["G/B",4]]},
+    {"m":"V2","b":[["Am",4],["Em/G",4]]},
+    {"m":"V3","b":[["F",4],["C/E",4]]},
+    {"m":"V4","b":[["Dm7",4],["G",4]]},
+    {"m":"P1","b":[["F",4],["G",4]]},
+    {"m":"P2","b":[["Em",2],["Am",2],["F",2],["G",2]]},
+    {"m":"C1","b":[["C",4],["G",4]]},
+    {"m":"C2","b":[["Am",4],["F",4]]},
+    {"m":"C3","b":[["C",4],["G",4]]},
+    {"m":"C4","b":[["F",4],["G",4]]},
+    {"m":"C5","b":[["F",2],["Fm",2],["C",4]]},
+    {"m":"V1","b":[["C",4],["G/B",4]]},
+    {"m":"V2","b":[["Am",4],["Em/G",4]]},
+    {"m":"V3","b":[["F",4],["C/E",4]]},
+    {"m":"V4","b":[["Dm7",4],["G",4]]},
+    {"m":"V3","b":[["F",4],["C/E",4]]},
+    {"m":"V4","b":[["Dm7",4],["G",4]]},
+    {"m":"P1","b":[["F",4],["G",4]]},
+    {"m":"P2","b":[["Em",2],["Am",2],["F",2],["G",2]]},
+    {"m":"C1","b":[["C",4],["G",4]]},
+    {"m":"C2","b":[["Am",4],["F",4]]},
+    {"m":"C3","b":[["C",4],["G",4]]},
+    {"m":"C4","b":[["F",4],["G",4]]},
+    {"m":"C5","b":[["F",2],["Fm",2],["C",4]]},
+    {"m":"B1","b":[["Am",4],["Em",4]]},
+    {"m":"B2","b":[["F",4],["C",4]]},
+    {"m":"B3","b":[["F",4],["G",4]]},
+    {"m":"B4","b":[["C",4],["C7",4]]},
+    {"m":"B5","b":[["F",4],["G",4]]},
+    {"m":"B6","b":[["Am",4],["G",4]]},
+    {"m":"C1","b":[["C",4],["G",4]]},
+    {"m":"C2","b":[["Am",4],["F",4]]},
+    {"m":"C3","b":[["C",4],["G",4]]},
+    {"m":"C4","b":[["F",4],["G",4]]},
+    {"m":"C5","b":[["F",2],["Fm",2],["C",4]]},
+    {"m":"R","b":[["F",4],["C/E",4]]},
+    {"m":"R","b":[["Dm7",4],["G",4]]}
+  ]
+}
+</script>
+
+<script>
+(() => {
+  "use strict";
+
+  const Audio = window.AudioContext || window.webkitAudioContext;
+  const panel = document.querySelector(".player");
+  if (!Audio || !panel) return;
+
+  const score = JSON.parse(document.getElementById("score").textContent);
+  const lineEls = Array.from(document.querySelectorAll(".stanza p"));
+  const fill = panel.querySelector(".bar span");
+  const clock = panel.querySelector(".clock");
+  const buttons = {
+    all: panel.querySelector('[data-act="all"]'),
+    chorus: panel.querySelector('[data-act="chorus"]'),
+    stop: panel.querySelector('[data-act="stop"]'),
+  };
+  panel.hidden = false;
+
+  const SPB = 60 / score.bpm;
+  const ARP = [0, 1, 2, 3, 2, 3, 1, 2];
+
+  /* 악보를 시간 위에 펼친다 */
+  function build(from, to, lead) {
+    const notes = [];
+    const marks = [];
+    let beat = 0;
+
+    const strum = (bars) => {
+      for (const [name, span] of bars) {
+        const voicing = score.voicings[name];
+        const eighths = Math.round(span * 2);
+        for (let i = 0; i < eighths; i++) {
+          notes.push({
+            t: (beat + i * 0.5) * SPB,
+            midi: voicing[ARP[i % ARP.length]],
+            dur: 0.5 * SPB,
+            gain: i === 0 ? 0.115 : 0.075,
+            bright: 1500,
+          });
+        }
+        beat += span;
+      }
+    };
+
+    if (lead) strum(lead);
+
+    for (let i = from; i <= to; i++) {
+      const line = score.lines[i];
+      const head = beat;
+      marks.push({ el: lineEls[i], t: head * SPB });
+      strum(line.b);
+      let cursor = head;
+      for (const [midi, len] of score.mel[line.m]) {
+        if (midi > 0) {
+          notes.push({
+            t: cursor * SPB,
+            midi,
+            dur: len * SPB * 0.96,
+            gain: 0.2,
+            bright: 2600,
+          });
+        }
+        cursor += len;
+      }
+    }
+
+    strum(score.coda);
+    return { notes, marks, length: beat * SPB };
+  }
+
+  /* 피아노에 가까운 소리 하나 */
+  function strike(ctx, out, note, at) {
+    const freq = 440 * Math.pow(2, (note.midi - 69) / 12);
+    const t = at + note.t;
+    const body = ctx.createOscillator();
+    const shine = ctx.createOscillator();
+    const bodyGain = ctx.createGain();
+    const shineGain = ctx.createGain();
+    const lp = ctx.createBiquadFilter();
+
+    body.type = "triangle";
+    body.frequency.value = freq;
+    shine.type = "sine";
+    shine.frequency.value = freq * 2.004;
+
+    lp.type = "lowpass";
+    lp.Q.value = 0.6;
+    lp.frequency.setValueAtTime(note.bright, t);
+    lp.frequency.exponentialRampToValueAtTime(
+      Math.max(320, note.bright * 0.22), t + note.dur + 0.45);
+
+    const tail = note.dur + 0.55;
+    bodyGain.gain.setValueAtTime(0.0001, t);
+    bodyGain.gain.exponentialRampToValueAtTime(note.gain, t + 0.015);
+    bodyGain.gain.exponentialRampToValueAtTime(0.0001, t + tail);
+    shineGain.gain.setValueAtTime(0.0001, t);
+    shineGain.gain.exponentialRampToValueAtTime(note.gain * 0.22, t + 0.01);
+    shineGain.gain.exponentialRampToValueAtTime(0.0001, t + note.dur * 0.6 + 0.2);
+
+    body.connect(bodyGain).connect(lp);
+    shine.connect(shineGain).connect(lp);
+    lp.connect(out);
+    body.start(t); shine.start(t);
+    body.stop(t + tail + 0.1); shine.stop(t + tail + 0.1);
+  }
+
+  function room(ctx) {
+    const len = Math.floor(ctx.sampleRate * 2.4);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+      }
+    }
+    const conv = ctx.createConvolver();
+    conv.buffer = buf;
+    return conv;
+  }
+
+  let ctx = null, timer = null, frame = null, plan = null, at = 0, cursor = 0, lit = null;
+
+  const clockText = (s) => {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  };
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (frame) { cancelAnimationFrame(frame); frame = null; }
+    if (lit) { lit.classList.remove("now"); lit = null; }
+    if (ctx) {
+      const dying = ctx;
+      try { dying.close(); } catch (e) { /* 이미 닫힘 */ }
+      ctx = null;
+    }
+    plan = null;
+    fill.style.width = "0";
+    clock.textContent = "0:00";
+    buttons.all.disabled = false;
+    buttons.chorus.disabled = false;
+    buttons.stop.disabled = true;
+  }
+
+  function follow() {
+    if (!ctx || !plan) return;
+    const now = ctx.currentTime - at;
+    let current = null;
+    for (const mark of plan.marks) {
+      if (now >= mark.t - 0.05) current = mark.el; else break;
+    }
+    if (current !== lit) {
+      if (lit) lit.classList.remove("now");
+      if (current) {
+        current.classList.add("now");
+        const box = current.getBoundingClientRect();
+        if (box.top < 80 || box.bottom > window.innerHeight - 80) {
+          current.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }
+      lit = current;
+    }
+    fill.style.width = Math.min(100, (now / plan.length) * 100) + "%";
+    clock.textContent = clockText(now);
+    if (now > plan.length + 1.2) { stop(); return; }
+    frame = requestAnimationFrame(follow);
+  }
+
+  function play(from, to, lead) {
+    stop();
+    ctx = new Audio();
+    const master = ctx.createGain();
+    master.gain.value = 0.9;
+    const wet = ctx.createGain();
+    wet.gain.value = 0.26;
+    const reverb = room(ctx);
+    master.connect(ctx.destination);
+    master.connect(reverb).connect(wet).connect(ctx.destination);
+
+    plan = build(from, to, lead);
+    plan.notes.sort((a, b) => a.t - b.t);
+    cursor = 0;
+    at = ctx.currentTime + 0.25;
+
+    const pump = () => {
+      if (!ctx) return;
+      const horizon = ctx.currentTime - at + 1.5;
+      while (cursor < plan.notes.length && plan.notes[cursor].t < horizon) {
+        strike(ctx, master, plan.notes[cursor++], at);
+      }
+      if (cursor >= plan.notes.length) { clearInterval(timer); timer = null; }
+    };
+    pump();
+    timer = setInterval(pump, 250);
+    frame = requestAnimationFrame(follow);
+
+    buttons.all.disabled = true;
+    buttons.chorus.disabled = true;
+    buttons.stop.disabled = false;
+  }
+
+  buttons.all.addEventListener("click", () =>
+    play(0, score.lines.length - 1, score.intro));
+  buttons.chorus.addEventListener("click", () =>
+    play(score.chorus[0], score.chorus[1], [["C", 4]]));
+  buttons.stop.addEventListener("click", stop);
+  window.addEventListener("pagehide", stop);
+})();
+</script>
