@@ -204,6 +204,21 @@
     background: var(--accent);
   }
 
+  .modes { gap: 0.4rem 1rem; }
+  .mode-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+  .player .mode {
+    border-bottom-color: transparent;
+    color: var(--ink-faint);
+  }
+  .player .mode[aria-pressed="true"] {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
   .player-note { font-size: 0.76rem; line-height: 1.75; color: var(--ink-faint); }
 
   .stanza p.now { color: var(--accent); }
@@ -451,6 +466,11 @@
 
     <div class="player" hidden>
       <p class="player-label">들어보기</p>
+      <div class="player-row modes">
+        <span class="mode-label">편곡</span>
+        <button type="button" class="mode" data-mode="piano" aria-pressed="true">피아노</button>
+        <button type="button" class="mode" data-mode="kpop" aria-pressed="false">K-POP</button>
+      </div>
       <div class="player-row">
         <button type="button" data-act="all">처음부터</button>
         <button type="button" data-act="chorus">후렴만</button>
@@ -545,6 +565,18 @@
           <p>팔월 열닷새, 우리가 시작된 날</p>
           <p>당신은 내 생에서 가장 긴 노래</p>
           <p>아직도 다 못 부른, 나의 노래</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <p class="mark">랩 <em>K-POP 버전</em></p>
+      <div class="lines">
+        <div class="stanza">
+          <p>서른세 번의 팔월을 지나오는 동안</p>
+          <p>당신이 차려준 밥을 먹고 문을 나섰지</p>
+          <p>세상이 나를 뭐라고 부르든 상관없어</p>
+          <p>이 집에 들어서면 나는 그냥 당신의 사람</p>
         </div>
       </div>
     </div>
@@ -659,6 +691,18 @@
       </ul>
     </section>
 
+    <section>
+      <h3>K-POP 버전</h3>
+      <ul>
+        <li>빠르기는 그대로 두고 하프타임 비트를 깔았습니다. 로즈 피아노, 서브 베이스, 스트링 패드가 얹힙니다.</li>
+        <li>2절 후렴 뒤에 <b>랩 여덟 마디</b>가 들어갑니다. 랩이 부담스러우면 박자에 맞춰 읊조리기만 해도 됩니다.</li>
+        <li>브릿지에서 비트를 걷어냈다가 “다시 태어나도”부터 다시 쌓습니다.</li>
+        <li>마지막 후렴은 <b>D major</b>로 한 음 올라갑니다. 목이 힘드시면 올리지 않아도 곡은 성립합니다.</li>
+        <li>후렴에는 화음이 한 겹 깔립니다. 자녀분이나 친구가 아래를 받쳐주면 그 자리가 살아납니다.</li>
+        <li>애드리브 자리는 후렴 끝 “나의 노래” 뒤 두 박입니다. 비워두었으니 마음대로 채우세요.</li>
+      </ul>
+    </section>
+
     <p class="colophon">
       인쇄하면 가사만 한 장으로 나옵니다. 부록은 다음 장으로 넘어갑니다.
     </p>
@@ -705,48 +749,57 @@
   "intro": [["C",4],["C",4]],
   "coda":  [["C",4],["C",4]],
   "chorus": [10, 14],
+  "kpop": {
+    "intro": [["C",4],["Am",4],["F",4],["G",4]],
+    "hook": [[72,1],[72,0.5],[71,0.5],[69,0.5],[67,1.5],[0,4],[69,0.5],[71,0.5],[72,1],[74,2],[0,4]],
+    "codaShift": 2
+  },
   "lines": [
-    {"m":"V1","b":[["C",4],["G/B",4]]},
-    {"m":"V2","b":[["Am",4],["Em/G",4]]},
-    {"m":"V3","b":[["F",4],["C/E",4]]},
-    {"m":"V4","b":[["Dm7",4],["G",4]]},
-    {"m":"V1","b":[["C",4],["G/B",4]]},
-    {"m":"V2","b":[["Am",4],["Em/G",4]]},
-    {"m":"V3","b":[["F",4],["C/E",4]]},
-    {"m":"V4","b":[["Dm7",4],["G",4]]},
-    {"m":"P1","b":[["F",4],["G",4]]},
-    {"m":"P2","b":[["Em",2],["Am",2],["F",2],["G",2]]},
-    {"m":"C1","b":[["C",4],["G",4]]},
-    {"m":"C2","b":[["Am",4],["F",4]]},
-    {"m":"C3","b":[["C",4],["G",4]]},
-    {"m":"C4","b":[["F",4],["G",4]]},
-    {"m":"C5","b":[["F",2],["Fm",2],["C",4]]},
-    {"m":"V1","b":[["C",4],["G/B",4]]},
-    {"m":"V2","b":[["Am",4],["Em/G",4]]},
-    {"m":"V3","b":[["F",4],["C/E",4]]},
-    {"m":"V4","b":[["Dm7",4],["G",4]]},
-    {"m":"V3","b":[["F",4],["C/E",4]]},
-    {"m":"V4","b":[["Dm7",4],["G",4]]},
-    {"m":"P1","b":[["F",4],["G",4]]},
-    {"m":"P2","b":[["Em",2],["Am",2],["F",2],["G",2]]},
-    {"m":"C1","b":[["C",4],["G",4]]},
-    {"m":"C2","b":[["Am",4],["F",4]]},
-    {"m":"C3","b":[["C",4],["G",4]]},
-    {"m":"C4","b":[["F",4],["G",4]]},
-    {"m":"C5","b":[["F",2],["Fm",2],["C",4]]},
-    {"m":"B1","b":[["Am",4],["Em",4]]},
-    {"m":"B2","b":[["F",4],["C",4]]},
-    {"m":"B3","b":[["F",4],["G",4]]},
-    {"m":"B4","b":[["C",4],["C7",4]]},
-    {"m":"B5","b":[["F",4],["G",4]]},
-    {"m":"B6","b":[["Am",4],["G",4]]},
-    {"m":"C1","b":[["C",4],["G",4]]},
-    {"m":"C2","b":[["Am",4],["F",4]]},
-    {"m":"C3","b":[["C",4],["G",4]]},
-    {"m":"C4","b":[["F",4],["G",4]]},
-    {"m":"C5","b":[["F",2],["Fm",2],["C",4]]},
-    {"m":"R","b":[["F",4],["C/E",4]]},
-    {"m":"R","b":[["Dm7",4],["G",4]]}
+    {"m":"V1","b":[["C",4],["G/B",4]],"i":0},
+    {"m":"V2","b":[["Am",4],["Em/G",4]],"i":0},
+    {"m":"V3","b":[["F",4],["C/E",4]],"i":1},
+    {"m":"V4","b":[["Dm7",4],["G",4]],"i":1},
+    {"m":"V1","b":[["C",4],["G/B",4]],"i":1},
+    {"m":"V2","b":[["Am",4],["Em/G",4]],"i":1},
+    {"m":"V3","b":[["F",4],["C/E",4]],"i":1},
+    {"m":"V4","b":[["Dm7",4],["G",4]],"i":1},
+    {"m":"P1","b":[["F",4],["G",4]],"i":2},
+    {"m":"P2","b":[["Em",2],["Am",2],["F",2],["G",2]],"i":2},
+    {"m":"C1","b":[["C",4],["G",4]],"i":3},
+    {"m":"C2","b":[["Am",4],["F",4]],"i":3},
+    {"m":"C3","b":[["C",4],["G",4]],"i":3},
+    {"m":"C4","b":[["F",4],["G",4]],"i":3},
+    {"m":"C5","b":[["F",2],["Fm",2],["C",4]],"i":3},
+    {"m":"V1","b":[["C",4],["G/B",4]],"i":1},
+    {"m":"V2","b":[["Am",4],["Em/G",4]],"i":1},
+    {"m":"V3","b":[["F",4],["C/E",4]],"i":1},
+    {"m":"V4","b":[["Dm7",4],["G",4]],"i":1},
+    {"m":"V3","b":[["F",4],["C/E",4]],"i":1},
+    {"m":"V4","b":[["Dm7",4],["G",4]],"i":1},
+    {"m":"P1","b":[["F",4],["G",4]],"i":2},
+    {"m":"P2","b":[["Em",2],["Am",2],["F",2],["G",2]],"i":2},
+    {"m":"C1","b":[["C",4],["G",4]],"i":3},
+    {"m":"C2","b":[["Am",4],["F",4]],"i":3},
+    {"m":"C3","b":[["C",4],["G",4]],"i":3},
+    {"m":"C4","b":[["F",4],["G",4]],"i":3},
+    {"m":"C5","b":[["F",2],["Fm",2],["C",4]],"i":3},
+    {"m":"R","b":[["Am",4],["F",4]],"i":2,"rap":true},
+    {"m":"R","b":[["C",4],["G",4]],"i":2,"rap":true},
+    {"m":"R","b":[["Am",4],["F",4]],"i":2,"rap":true},
+    {"m":"R","b":[["C",4],["G",4]],"i":2,"rap":true},
+    {"m":"B1","b":[["Am",4],["Em",4]],"i":1},
+    {"m":"B2","b":[["F",4],["C",4]],"i":1},
+    {"m":"B3","b":[["F",4],["G",4]],"i":1},
+    {"m":"B4","b":[["C",4],["C7",4]],"i":1},
+    {"m":"B5","b":[["F",4],["G",4]],"i":2},
+    {"m":"B6","b":[["Am",4],["G",4]],"i":2},
+    {"m":"C1","b":[["C",4],["G",4]],"i":3,"k":2},
+    {"m":"C2","b":[["Am",4],["F",4]],"i":3,"k":2},
+    {"m":"C3","b":[["C",4],["G",4]],"i":3,"k":2},
+    {"m":"C4","b":[["F",4],["G",4]],"i":3,"k":2},
+    {"m":"C5","b":[["F",2],["Fm",2],["C",4]],"i":3,"k":2},
+    {"m":"R","b":[["F",4],["C/E",4]],"i":0,"k":2},
+    {"m":"R","b":[["Dm7",4],["G",4]],"i":0,"k":2}
   ]
 }
 </script>
@@ -755,111 +808,277 @@
 (() => {
   "use strict";
 
-  const Audio = window.AudioContext || window.webkitAudioContext;
+  const AudioCtor = window.AudioContext || window.webkitAudioContext;
   const panel = document.querySelector(".player");
-  if (!Audio || !panel) return;
+  if (!AudioCtor || !panel) return;
 
   const score = JSON.parse(document.getElementById("score").textContent);
   const lineEls = Array.from(document.querySelectorAll(".stanza p"));
   const fill = panel.querySelector(".bar span");
   const clock = panel.querySelector(".clock");
-  const buttons = {
+  const acts = {
     all: panel.querySelector('[data-act="all"]'),
     chorus: panel.querySelector('[data-act="chorus"]'),
     stop: panel.querySelector('[data-act="stop"]'),
   };
+  const modeButtons = Array.from(panel.querySelectorAll(".mode"));
   panel.hidden = false;
 
   const SPB = 60 / score.bpm;
   const ARP = [0, 1, 2, 3, 2, 3, 1, 2];
+  const KICK = { 1: [0, 10], 2: [0, 6, 10], 3: [0, 6, 10, 13] };
+  const CLAP = { 1: [8], 2: [8], 3: [8, 14] };
+  const HAT = {
+    1: [0, 2, 4, 6, 8, 10, 12, 14],
+    2: [0, 2, 4, 6, 8, 10, 12, 14, 15],
+    3: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15],
+  };
 
-  /* 악보를 시간 위에 펼친다 */
-  function build(from, to, lead) {
+  let mode = "piano";
+
+  /* 화음은 그 순간의 코드 안에서만 고른다 — 부딪히지 않게 */
+  function harmonyBelow(midi, voicing) {
+    const pcs = new Set(voicing.map((n) => ((n % 12) + 12) % 12));
+    for (let n = midi - 3; n >= midi - 9; n--) {
+      if (pcs.has(((n % 12) + 12) % 12)) return n;
+    }
+    return null;
+  }
+
+  function build(from, to) {
+    const kpop = mode === "kpop";
     const notes = [];
     const marks = [];
     let beat = 0;
 
-    const strum = (bars) => {
+    const add = (t, voice, midi, dur, gain) =>
+      notes.push({ t: t * SPB, voice, midi, dur: dur * SPB, gain });
+
+    const chords = (bars, shift, level) => {
+      const map = [];
       for (const [name, span] of bars) {
-        const voicing = score.voicings[name];
-        const eighths = Math.round(span * 2);
-        for (let i = 0; i < eighths; i++) {
-          notes.push({
-            t: (beat + i * 0.5) * SPB,
-            midi: voicing[ARP[i % ARP.length]],
-            dur: 0.5 * SPB,
-            gain: i === 0 ? 0.115 : 0.075,
-            bright: 1500,
-          });
+        const v = score.voicings[name].map((n) => n + shift);
+        map.push({ from: beat, to: beat + span, v });
+        for (let i = 0; i < Math.round(span * 2); i++) {
+          add(beat + i * 0.5, kpop ? "rhodes" : "piano",
+              v[ARP[i % ARP.length]], 0.5, i === 0 ? 0.115 : 0.075);
+        }
+        if (kpop && level >= 1) add(beat, "bass", v[0] - 12, span, 0.4);
+        if (kpop && level >= 2) {
+          for (const n of v.slice(1)) add(beat, "pad", n + 12, span, 0.03);
         }
         beat += span;
       }
+      return map;
     };
 
-    if (lead) strum(lead);
+    const drums = (start, level) => {
+      for (const s of KICK[level]) add(start + s * 0.25, "kick", 0, 0.4, 0.6);
+      for (const s of CLAP[level]) add(start + s * 0.25, "clap", 0, 0.3, 0.28);
+      for (const s of HAT[level]) {
+        add(start + s * 0.25, "hat", 0, 0.12, s % 2 ? 0.055 : 0.095);
+      }
+    };
+
+    if (kpop) {
+      const head = beat;
+      chords(score.kpop.intro, 0, 1);
+      for (let b = 0; b < 4; b++) drums(head + b * 4, 1);
+      let c = head;
+      for (const [midi, len] of score.kpop.hook) {
+        if (midi > 0) add(c, "lead", midi, len, 0.16);
+        c += len;
+      }
+    } else {
+      chords(score.intro, 0, 0);
+    }
 
     for (let i = from; i <= to; i++) {
       const line = score.lines[i];
+      if (!kpop && line.rap) continue;
+      const shift = kpop && line.k ? line.k : 0;
+      const level = kpop ? line.i : 0;
       const head = beat;
       marks.push({ el: lineEls[i], t: head * SPB });
-      strum(line.b);
+      const map = chords(line.b, shift, level);
+      if (level >= 1) { drums(head, level); drums(head + 4, level); }
       let cursor = head;
       for (const [midi, len] of score.mel[line.m]) {
         if (midi > 0) {
-          notes.push({
-            t: cursor * SPB,
-            midi,
-            dur: len * SPB * 0.96,
-            gain: 0.2,
-            bright: 2600,
-          });
+          const n = midi + shift;
+          add(cursor, kpop ? "lead" : "piano", n, len, kpop ? 0.17 : 0.2);
+          if (kpop && level >= 3) {
+            const slot = map.find((m) => cursor >= m.from && cursor < m.to) || map[0];
+            const h = harmonyBelow(n, slot.v);
+            if (h) add(cursor, "harm", h, len, 0.055);
+          }
         }
         cursor += len;
       }
     }
 
-    strum(score.coda);
+    chords(score.coda, kpop ? score.kpop.codaShift : 0, 0);
     return { notes, marks, length: beat * SPB };
   }
 
-  /* 피아노에 가까운 소리 하나 */
-  function strike(ctx, out, note, at) {
-    const freq = 440 * Math.pow(2, (note.midi - 69) / 12);
-    const t = at + note.t;
+  /* ── 소리 ─────────────────────────────────────────── */
+
+  let ctx = null, master = null, noise = null;
+  let timer = null, frame = null, plan = null, at = 0, cursor = 0, lit = null;
+
+  const hz = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+
+  function struck(freq, t, dur, gain, bright, ring, shine) {
     const body = ctx.createOscillator();
-    const shine = ctx.createOscillator();
+    const bell = ctx.createOscillator();
     const bodyGain = ctx.createGain();
-    const shineGain = ctx.createGain();
+    const bellGain = ctx.createGain();
     const lp = ctx.createBiquadFilter();
 
     body.type = "triangle";
     body.frequency.value = freq;
-    shine.type = "sine";
-    shine.frequency.value = freq * 2.004;
+    bell.type = "sine";
+    bell.frequency.value = freq * 2.004;
 
     lp.type = "lowpass";
     lp.Q.value = 0.6;
-    lp.frequency.setValueAtTime(note.bright, t);
+    lp.frequency.setValueAtTime(bright, t);
     lp.frequency.exponentialRampToValueAtTime(
-      Math.max(320, note.bright * 0.22), t + note.dur + 0.45);
+      Math.max(320, bright * 0.22), t + dur + 0.45);
 
-    const tail = note.dur + 0.55;
+    const tail = dur + ring;
     bodyGain.gain.setValueAtTime(0.0001, t);
-    bodyGain.gain.exponentialRampToValueAtTime(note.gain, t + 0.015);
+    bodyGain.gain.exponentialRampToValueAtTime(gain, t + 0.015);
     bodyGain.gain.exponentialRampToValueAtTime(0.0001, t + tail);
-    shineGain.gain.setValueAtTime(0.0001, t);
-    shineGain.gain.exponentialRampToValueAtTime(note.gain * 0.22, t + 0.01);
-    shineGain.gain.exponentialRampToValueAtTime(0.0001, t + note.dur * 0.6 + 0.2);
+    bellGain.gain.setValueAtTime(0.0001, t);
+    bellGain.gain.exponentialRampToValueAtTime(gain * shine, t + 0.01);
+    bellGain.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.6 + 0.2);
 
     body.connect(bodyGain).connect(lp);
-    shine.connect(shineGain).connect(lp);
-    lp.connect(out);
-    body.start(t); shine.start(t);
-    body.stop(t + tail + 0.1); shine.stop(t + tail + 0.1);
+    bell.connect(bellGain).connect(lp);
+    lp.connect(master);
+    body.start(t); bell.start(t);
+    body.stop(t + tail + 0.1); bell.stop(t + tail + 0.1);
   }
 
-  function room(ctx) {
-    const len = Math.floor(ctx.sampleRate * 2.4);
+  function sung(freq, t, dur, gain, cutoff, attack, vibrato) {
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.value = freq;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = cutoff;
+    lp.Q.value = 0.9;
+    const g = ctx.createGain();
+    const hold = Math.max(dur, attack + 0.02);
+
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + attack);
+    g.gain.setValueAtTime(gain, t + hold);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + hold + 0.28);
+
+    osc.connect(g).connect(lp).connect(master);
+    osc.start(t);
+    osc.stop(t + hold + 0.35);
+
+    if (vibrato) {
+      const lfo = ctx.createOscillator();
+      const depth = ctx.createGain();
+      lfo.frequency.value = 5.2;
+      depth.gain.setValueAtTime(0, t);
+      depth.gain.linearRampToValueAtTime(7, t + Math.min(0.45, hold));
+      lfo.connect(depth).connect(osc.detune);
+      lfo.start(t);
+      lfo.stop(t + hold + 0.35);
+    }
+  }
+
+  function pad(freq, t, dur, gain) {
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 1100;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.7);
+    g.gain.setValueAtTime(gain, t + Math.max(dur, 0.8));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.7);
+    g.connect(lp).connect(master);
+    for (const cents of [-7, 7]) {
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.value = freq;
+      osc.detune.value = cents;
+      osc.connect(g);
+      osc.start(t);
+      osc.stop(t + dur + 0.8);
+    }
+  }
+
+  function lowEnd(freq, t, dur, gain) {
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.03);
+    g.gain.setValueAtTime(gain, t + Math.max(dur - 0.1, 0.15));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.12);
+    osc.connect(g).connect(master);
+    osc.start(t);
+    osc.stop(t + dur + 0.2);
+  }
+
+  function thump(t, gain) {
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(125, t);
+    osc.frequency.exponentialRampToValueAtTime(44, t + 0.08);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+    osc.connect(g).connect(master);
+    osc.start(t);
+    osc.stop(t + 0.4);
+  }
+
+  function hiss(t, dur, gain, type, freq, q) {
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    src.loop = true;
+    const f = ctx.createBiquadFilter();
+    f.type = type;
+    f.frequency.value = freq;
+    f.Q.value = q;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f).connect(g).connect(master);
+    src.start(t);
+    src.stop(t + dur + 0.05);
+  }
+
+  function voice(note, base) {
+    const t = base + note.t;
+    switch (note.voice) {
+      case "piano": struck(hz(note.midi), t, note.dur, note.gain, 2600, 0.55, 0.22); break;
+      case "rhodes": struck(hz(note.midi), t, note.dur, note.gain, 1500, 0.9, 0.45); break;
+      case "lead": sung(hz(note.midi), t, note.dur, note.gain, 1900, 0.045, true); break;
+      case "harm": sung(hz(note.midi), t, note.dur, note.gain, 1300, 0.07, false); break;
+      case "pad": pad(hz(note.midi), t, note.dur, note.gain); break;
+      case "bass": lowEnd(hz(note.midi), t, note.dur, note.gain); break;
+      case "kick": thump(t, note.gain); break;
+      case "clap":
+        hiss(t, 0.13, note.gain, "bandpass", 1700, 1.1);
+        hiss(t + 0.014, 0.19, note.gain * 0.7, "bandpass", 1300, 0.9);
+        break;
+      case "hat": hiss(t, 0.045, note.gain, "highpass", 7800, 0.7); break;
+    }
+  }
+
+  function room() {
+    const len = Math.floor(ctx.sampleRate * 2.2);
     const buf = ctx.createBuffer(2, len, ctx.sampleRate);
     for (let ch = 0; ch < 2; ch++) {
       const data = buf.getChannelData(ch);
@@ -872,7 +1091,14 @@
     return conv;
   }
 
-  let ctx = null, timer = null, frame = null, plan = null, at = 0, cursor = 0, lit = null;
+  function whiteNoise() {
+    const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
+  }
+
+  /* ── 재생 ─────────────────────────────────────────── */
 
   const clockText = (s) => {
     s = Math.max(0, Math.floor(s));
@@ -884,16 +1110,15 @@
     if (frame) { cancelAnimationFrame(frame); frame = null; }
     if (lit) { lit.classList.remove("now"); lit = null; }
     if (ctx) {
-      const dying = ctx;
-      try { dying.close(); } catch (e) { /* 이미 닫힘 */ }
-      ctx = null;
+      try { ctx.close(); } catch (e) { /* 이미 닫힘 */ }
+      ctx = null; master = null; noise = null;
     }
     plan = null;
     fill.style.width = "0";
     clock.textContent = "0:00";
-    buttons.all.disabled = false;
-    buttons.chorus.disabled = false;
-    buttons.stop.disabled = true;
+    acts.all.disabled = false;
+    acts.chorus.disabled = false;
+    acts.stop.disabled = true;
   }
 
   function follow() {
@@ -920,27 +1145,27 @@
     frame = requestAnimationFrame(follow);
   }
 
-  function play(from, to, lead) {
+  function play(from, to) {
     stop();
-    ctx = new Audio();
-    const master = ctx.createGain();
-    master.gain.value = 0.9;
+    ctx = new AudioCtor();
+    master = ctx.createGain();
+    master.gain.value = mode === "kpop" ? 0.72 : 0.9;
     const wet = ctx.createGain();
-    wet.gain.value = 0.26;
-    const reverb = room(ctx);
+    wet.gain.value = mode === "kpop" ? 0.16 : 0.26;
     master.connect(ctx.destination);
-    master.connect(reverb).connect(wet).connect(ctx.destination);
+    master.connect(room()).connect(wet).connect(ctx.destination);
+    noise = whiteNoise();
 
-    plan = build(from, to, lead);
+    plan = build(from, to);
     plan.notes.sort((a, b) => a.t - b.t);
     cursor = 0;
-    at = ctx.currentTime + 0.25;
+    at = ctx.currentTime + 0.3;
 
     const pump = () => {
       if (!ctx) return;
       const horizon = ctx.currentTime - at + 1.5;
       while (cursor < plan.notes.length && plan.notes[cursor].t < horizon) {
-        strike(ctx, master, plan.notes[cursor++], at);
+        voice(plan.notes[cursor++], at);
       }
       if (cursor >= plan.notes.length) { clearInterval(timer); timer = null; }
     };
@@ -948,16 +1173,26 @@
     timer = setInterval(pump, 250);
     frame = requestAnimationFrame(follow);
 
-    buttons.all.disabled = true;
-    buttons.chorus.disabled = true;
-    buttons.stop.disabled = false;
+    acts.all.disabled = true;
+    acts.chorus.disabled = true;
+    acts.stop.disabled = false;
   }
 
-  buttons.all.addEventListener("click", () =>
-    play(0, score.lines.length - 1, score.intro));
-  buttons.chorus.addEventListener("click", () =>
-    play(score.chorus[0], score.chorus[1], [["C", 4]]));
-  buttons.stop.addEventListener("click", stop);
+  acts.all.addEventListener("click", () => play(0, score.lines.length - 1));
+  acts.chorus.addEventListener("click", () => play(score.chorus[0], score.chorus[1]));
+  acts.stop.addEventListener("click", stop);
+
+  for (const button of modeButtons) {
+    button.addEventListener("click", () => {
+      if (button.dataset.mode === mode) return;
+      stop();
+      mode = button.dataset.mode;
+      for (const other of modeButtons) {
+        other.setAttribute("aria-pressed", String(other.dataset.mode === mode));
+      }
+    });
+  }
+
   window.addEventListener("pagehide", stop);
 })();
 </script>
