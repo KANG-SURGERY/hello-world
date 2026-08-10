@@ -894,7 +894,7 @@
     },
   };
 
-  const VOICE_GAIN = 0.3;
+  const VOICE_GAIN = 0.42;
   let mode = "ballad";
   let voiceOn = true;
 
@@ -918,16 +918,28 @@
 
   /* 초성 19자 — 자음의 종류 */
   const ONSET = [
-    "velar","velar","nasal","alveolar","alveolar","liquid","nasal",
-    "labial","labial","fricative","fricative",null,"affricate",
-    "affricate","affricate","velar","alveolar","labial","breath",
+    ["velar","lenis"], ["velar","tense"], ["nasal",null],
+    ["alveolar","lenis"], ["alveolar","tense"], ["liquid",null],
+    ["nasal",null], ["labial","lenis"], ["labial","tense"],
+    ["fricative","lenis"], ["fricative","tense"], [null,null],
+    ["affricate","lenis"], ["affricate","tense"], ["affricate","aspirated"],
+    ["velar","aspirated"], ["alveolar","aspirated"], ["labial","aspirated"],
+    ["breath",null],
   ];
 
-  const BURST = { labial: 700, alveolar: 2600, velar: 1800 };
+  const BURST = { labial: 900, alveolar: 2700, velar: 1900 };
+  /* 자음이 끝나는 자리 — F2가 여기서 모음 쪽으로 미끄러진다 */
+  const LOCUS = { labial: 800, alveolar: 1750, velar: 2000 };
+  const CLOSURE = { lenis: 0.030, tense: 0.045, aspirated: 0.028 };
+  const ASPIRATION = { lenis: 0.022, tense: 0.008, aspirated: 0.055 };
+  const BURST_GAIN = { lenis: 0.7, tense: 1.0, aspirated: 0.85 };
   const JONG_NASAL = new Set([4, 16, 21]);   // ㄴ ㅁ ㅇ
   const JONG_LIQUID = new Set([8]);          // ㄹ
-  const FORMANT_BW = [90, 110, 170];
-  const FORMANT_AMP = [1.0, 0.6, 0.32];
+  /* 포먼트가 좁으면 배음이 그 사이를 빠져나가 모음이 사라진다 */
+  const FORMANT_BW = [130, 170, 250];
+  const FORMANT_AMP = [1.0, 0.55, 0.28];
+  /* 사람이 알아듣는 높이로 — 쓰여진 가락보다 한 옥타브 아래에서 부른다 */
+  const VOICE_SHIFT = -12;
 
   function jamo(ch) {
     const code = ch.charCodeAt(0) - 0xAC00;
@@ -986,7 +998,10 @@
         }
         if (style.bass && level >= 1) add(beat, "bass", v[0] - 12, span, style.bass);
         if (style.swell && level >= 2) {
-          for (const n of v.slice(1)) add(beat, style.swell, n + 12, span, style.swellGain);
+          for (const n of v.slice(1)) {
+            add(beat, style.swell, n + 12, span,
+                style.swellGain * (voiceOn ? 0.55 : 1));
+          }
         }
         beat += span;
       }
@@ -1046,7 +1061,7 @@
           add(w.start, "sing", n, w.len, VOICE_GAIN, { jam: w.jam, tie: w.tie });
           if (level >= 3) {
             const h = harmonyBelow(n, under(w.start));
-            if (h) add(w.start, "sing", h, w.len, VOICE_GAIN * 0.3,
+            if (h) add(w.start, "sing", h, w.len, VOICE_GAIN * 0.22,
                        { jam: w.jam, tie: true });
           }
         }
@@ -1054,7 +1069,7 @@
         /* 가락 없는 줄 — 읊조리듯 */
         const step = Math.min(0.5, 7 / chars.length);
         chars.forEach((jam, j) => {
-          add(head + 0.5 + j * step, "sing", 55 + shift - Math.floor(j / 8),
+          add(head + 0.5 + j * step, "sing", 62 + shift - Math.floor(j / 8),
               step * 0.9, VOICE_GAIN * 0.75, { jam, tie: false });
         });
       } else {
@@ -1075,7 +1090,7 @@
 
   /* ── 소리 ─────────────────────────────────────────── */
 
-  let ctx = null, master = null, noise = null;
+  let ctx = null, master = null, noise = null, vbus = null;
   let timer = null, frame = null, plan = null, at = 0, cursor = 0, lit = null;
 
   const hz = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
@@ -1194,28 +1209,43 @@
     osc.stop(t + 0.4);
   }
 
-  /* 자음 하나. 모음이 시작될 시각을 돌려준다. */
-  function consonant(kind, t, formants, freq, gain) {
-    if (!kind) return t;
+  /* 자음 하나 → { 모음이 시작될 시각, F2가 출발할 자리 } */
+  function consonant(kind, force, t, freq, gain) {
+    if (!kind) return { at: t, locus: null };
+
     if (kind === "labial" || kind === "alveolar" || kind === "velar") {
-      hiss(t + 0.028, 0.014, gain * 0.55, "bandpass", BURST[kind], 1.4);
-      return t + 0.042;
+      const gap = CLOSURE[force];
+      hiss(t + gap, 0.016, gain * BURST_GAIN[force], "bandpass", BURST[kind], 1.6);
+      const asp = ASPIRATION[force];
+      if (asp > 0.012) {
+        hiss(t + gap + 0.016, asp, gain * 0.3, "bandpass", 1600, 0.5);
+      }
+      return { at: t + gap + 0.016 + asp, locus: LOCUS[kind] };
     }
     if (kind === "affricate") {
-      hiss(t + 0.022, 0.06, gain * 0.35, "bandpass", 3600, 1.0);
-      return t + 0.082;
+      const gap = CLOSURE[force];
+      const len = force === "aspirated" ? 0.075 : 0.055;
+      hiss(t + gap, len, gain * 0.5, "bandpass", 3400, 1.0);
+      return { at: t + gap + len, locus: LOCUS.alveolar };
     }
     if (kind === "fricative") {
-      hiss(t, 0.085, gain * 0.34, "highpass", 4600, 0.7);
-      return t + 0.085;
+      const len = force === "tense" ? 0.1 : 0.085;
+      hiss(t, len, gain * 0.5, "highpass", 4400, 0.7);
+      return { at: t + len, locus: LOCUS.alveolar };
     }
     if (kind === "breath") {
-      hiss(t, 0.055, gain * 0.4, "bandpass", 1500, 0.6);
-      return t + 0.055;
+      hiss(t, 0.06, gain * 0.42, "bandpass", 1400, 0.6);
+      return { at: t + 0.06, locus: null };
     }
-    if (kind === "nasal") { hum(t, 0.06, freq, gain * 0.5); return t + 0.06; }
-    if (kind === "liquid") { hum(t, 0.032, freq, gain * 0.5, 420); return t + 0.032; }
-    return t;
+    if (kind === "nasal") {
+      hum(t, 0.07, freq, gain * 0.62);
+      return { at: t + 0.07, locus: LOCUS.alveolar };
+    }
+    if (kind === "liquid") {
+      hum(t, 0.04, freq, gain * 0.6, 400);
+      return { at: t + 0.04, locus: 1150 };
+    }
+    return { at: t, locus: null };
   }
 
   /* 코와 입술에서 나는 울림 — ㄴ ㅁ ㅇ ㄹ */
@@ -1231,7 +1261,7 @@
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(gain, t + 0.015);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.02);
-    osc.connect(bp).connect(g).connect(master);
+    osc.connect(bp).connect(g).connect(vbus || master);
     osc.start(t);
     osc.stop(t + dur + 0.05);
   }
@@ -1242,27 +1272,34 @@
     const [cho, jung, jong] = jam;
     const [glide, steady] = JUNG[jung];
     const fa = VOWEL[glide], fb = VOWEL[steady];
-    const start = tie ? t : consonant(ONSET[cho], t, fb, freq, gain);
-    const span = Math.max(t + dur - start, 0.07);
+    const head = tie ? { at: t, locus: null }
+                     : consonant(ONSET[cho][0], ONSET[cho][1], t, freq, gain);
+    const start = head.at;
+    const span = Math.max(t + dur - start, 0.08);
 
     const osc = ctx.createOscillator();
     osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(freq * (tie ? 1 : 0.955), start);
-    osc.frequency.exponentialRampToValueAtTime(freq, start + 0.06);
+    osc.frequency.setValueAtTime(freq * (tie ? 1 : 0.965), start);
+    osc.frequency.exponentialRampToValueAtTime(freq, start + 0.05);
 
+    /* 비브라토는 얕게. 깊으면 포먼트가 흔들려 모음이 뭉개진다. */
     const lfo = ctx.createOscillator();
     const depth = ctx.createGain();
-    lfo.frequency.value = 5.4;
+    lfo.frequency.value = 5.0;
     depth.gain.setValueAtTime(0, start);
-    depth.gain.linearRampToValueAtTime(10, start + Math.min(0.5, span));
+    depth.gain.linearRampToValueAtTime(5.5, start + Math.min(0.7, span));
     lfo.connect(depth).connect(osc.detune);
 
     const sum = ctx.createGain();
     for (let k = 0; k < 3; k++) {
       const bp = ctx.createBiquadFilter();
       bp.type = "bandpass";
-      bp.frequency.setValueAtTime(fa[k], start);
-      bp.frequency.linearRampToValueAtTime(fb[k], start + Math.min(0.09, span));
+      /* 자리 → 미끄러지는 모음 → 머무는 모음, 세 걸음으로 옮겨간다 */
+      const from = head.locus === null ? fa[k]
+                 : (k === 1 ? head.locus : fa[k] * (k === 0 ? 0.6 : 1));
+      bp.frequency.setValueAtTime(from, start);
+      bp.frequency.linearRampToValueAtTime(fa[k], start + Math.min(0.045, span * 0.4));
+      bp.frequency.linearRampToValueAtTime(fb[k], start + Math.min(0.13, span * 0.8));
       bp.Q.value = fb[k] / FORMANT_BW[k];
       const g = ctx.createGain();
       g.gain.value = FORMANT_AMP[k];
@@ -1271,10 +1308,10 @@
 
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, start);
-    env.gain.exponentialRampToValueAtTime(gain, start + 0.022);
-    env.gain.setValueAtTime(gain, start + Math.max(span - 0.05, 0.05));
-    env.gain.exponentialRampToValueAtTime(0.0001, start + span + 0.05);
-    sum.connect(env).connect(master);
+    env.gain.exponentialRampToValueAtTime(gain, start + 0.014);
+    env.gain.setValueAtTime(gain, start + Math.max(span - 0.045, 0.045));
+    env.gain.exponentialRampToValueAtTime(0.0001, start + span + 0.045);
+    sum.connect(env).connect(vbus || master);
 
     osc.start(start); osc.stop(start + span + 0.1);
     lfo.start(start); lfo.stop(start + span + 0.1);
@@ -1313,7 +1350,9 @@
       case "harm": sung(hz(note.midi), t, note.dur, note.gain, 1300, 0.09, false); break;
       case "strings": bowed(hz(note.midi), t, note.dur, note.gain, 1500, 1.0); break;
       case "pad": bowed(hz(note.midi), t, note.dur, note.gain, 1100, 0.7); break;
-      case "sing": singNote(t, note.dur, hz(note.midi), note.jam, note.gain, note.tie); break;
+      case "sing":
+        singNote(t, note.dur, hz(note.midi + VOICE_SHIFT), note.jam, note.gain, note.tie);
+        break;
       case "bass": lowEnd(hz(note.midi), t, note.dur, note.gain); break;
       case "kick": thump(t, note.gain); break;
       case "clap":
@@ -1360,7 +1399,7 @@
     if (lit) { lit.classList.remove("now"); lit = null; }
     if (ctx) {
       try { ctx.close(); } catch (e) { /* 이미 닫힘 */ }
-      ctx = null; master = null; noise = null;
+      ctx = null; master = null; noise = null; vbus = null;
     }
     plan = null;
     fill.style.width = "0";
@@ -1399,7 +1438,7 @@
     const style = STYLES[mode];
     ctx = new AudioCtor();
     master = ctx.createGain();
-    master.gain.value = voiceOn ? style.level * 0.8 : style.level;
+    master.gain.value = voiceOn ? style.level * 0.6 : style.level;
     /* 목소리가 겹치는 자리에서 깨지지 않도록 */
     const limiter = ctx.createDynamicsCompressor();
     limiter.threshold.value = -8;
@@ -1412,6 +1451,11 @@
     limiter.connect(ctx.destination);
     master.connect(limiter);
     master.connect(room()).connect(wet).connect(limiter);
+    vbus = ctx.createGain();
+    const voiceWet = ctx.createGain();
+    voiceWet.gain.value = 0.07;
+    vbus.connect(limiter);
+    vbus.connect(room()).connect(voiceWet).connect(limiter);
     noise = whiteNoise();
 
     plan = build(from, to);

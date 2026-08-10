@@ -148,7 +148,8 @@ def schedule(score, lyrics, style_name, with_voice):
                 add(beat, "bass", v[0] - 12, span, style["bass"])
             if style["swell"] and level >= 2:
                 for n in v[1:]:
-                    add(beat, style["swell"], n + 12, span, style["swell_gain"])
+                    add(beat, style["swell"], n + 12, span,
+                        style["swell_gain"] * (0.55 if with_voice else 1.0))
             beat += span
         return spans
 
@@ -195,7 +196,7 @@ def schedule(score, lyrics, style_name, with_voice):
                         slot = next((s for s in spans if s[0] <= start < s[1]), spans[0])
                         h = harmony_below(n, slot[2])
                         if h:
-                            add(start, "voice-low", h, length, 0.34, char)
+                            add(start, "voice-low", h, length, 0.22, char)
             else:
                 for start, midi, length in notes:
                     add(start, style["melody"], midi, length, style["melody_gain"])
@@ -206,7 +207,7 @@ def schedule(score, lyrics, style_name, with_voice):
                             add(start, "harm", h, length, style["melody_gain"] * 0.35)
         elif with_voice and chars:
             # 가락 없는 줄 — 읊조리듯
-            speak = 55 + shift
+            speak = 62 + shift
             room = 7.0 / max(len(chars), 1)
             step = min(0.5, room)
             for j, char in enumerate(chars):
@@ -366,7 +367,7 @@ def main():
 
     for start, kind, midi, dur, gain, char in notes:
         if kind.startswith("voice"):
-            freq = 440 * 2 ** ((midi - 69) / 12)
+            freq = 440 * 2 ** ((midi + vox.SHIFT - 69) / 12)
             chunk = vox.sing(char, freq, dur, gain, RNG)
             buf = voice_buf
         else:
@@ -377,8 +378,8 @@ def main():
 
     if with_voice:
         # 목소리가 반주에 묻히지 않도록 맞춘다
-        voice_buf *= (rms(band_buf) * 1.7) / rms(voice_buf)
-    mix = reverb(band_buf, STYLES[style_name]["wet"]) + reverb(voice_buf, 0.14)
+        voice_buf *= (rms(band_buf) * 2.5) / rms(voice_buf)
+    mix = reverb(band_buf, STYLES[style_name]["wet"]) + reverb(voice_buf, 0.06)
 
     mix *= 0.89 / max(np.abs(mix).max(), 1e-9)
     fade = int(2.0 * RATE)
