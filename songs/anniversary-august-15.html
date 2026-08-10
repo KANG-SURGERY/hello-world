@@ -468,8 +468,14 @@
       <p class="player-label">들어보기</p>
       <div class="player-row modes">
         <span class="mode-label">편곡</span>
-        <button type="button" class="mode" data-mode="piano" aria-pressed="true">피아노</button>
+        <button type="button" class="mode" data-mode="ballad" aria-pressed="true">발라드</button>
+        <button type="button" class="mode" data-mode="piano" aria-pressed="false">피아노</button>
         <button type="button" class="mode" data-mode="kpop" aria-pressed="false">K-POP</button>
+      </div>
+      <div class="player-row modes">
+        <span class="mode-label">목소리</span>
+        <button type="button" class="mode" data-voice="on" aria-pressed="true">노래</button>
+        <button type="button" class="mode" data-voice="off" aria-pressed="false">반주만</button>
       </div>
       <div class="player-row">
         <button type="button" data-act="all">처음부터</button>
@@ -479,7 +485,8 @@
       </div>
       <div class="bar"><span></span></div>
       <p class="player-note">
-        피아노 소리로 멜로디와 반주만 들려드립니다. 노랫말은 당신 목소리로 얹으세요.
+        「노래」는 합성 음성이 가사를 발음하며 부릅니다. 사람의 목소리가 아니라
+        기계로 만든 소리이니, 가락을 익히는 안내로 들어주세요.
         재생하는 동안 지금 부르는 줄에 불이 들어옵니다.
       </p>
     </div>
@@ -692,6 +699,27 @@
     </section>
 
     <section>
+      <h3>편곡 세 가지</h3>
+      <ul>
+        <li><b>피아노</b> — 피아노 한 대. 악보 그대로의 민얼굴입니다.</li>
+        <li><b>발라드</b> — 피아노에 스트링이 얹히고, 후렴부터 잔잔한 리듬이 들어옵니다.
+          1·3박을 짚고 2·4박을 브러시로 쓸어주는, 옛 발라드의 걸음걸이입니다.</li>
+        <li><b>K-POP</b> — 하프타임 비트에 랩 여덟 마디가 붙습니다.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>합성 음성에 대하여</h3>
+      <ul>
+        <li>「노래」를 켜면 기계로 만든 목소리가 가사를 발음하며 부릅니다. 사람의 목소리가 아니고,
+          어느 가수의 목소리도 아닙니다.</li>
+        <li>성대의 떨림을 만들고 세 겹의 공명으로 모음 색을 입히는 방식이라, 초성·중성·종성을
+          하나하나 따라 발음합니다. 다만 사람처럼 매끄럽지는 않습니다.</li>
+        <li>가락과 발음을 익히는 안내로 들으시고, 8월 15일에는 당신 목소리로 부르세요.</li>
+      </ul>
+    </section>
+
+    <section>
       <h3>K-POP 버전</h3>
       <ul>
         <li>빠르기는 그대로 두고 하프타임 비트를 깔았습니다. 로즈 피아노, 서브 베이스, 스트링 패드가 얹힙니다.</li>
@@ -749,7 +777,7 @@
   "intro": [["C",4],["C",4]],
   "coda":  [["C",4],["C",4]],
   "chorus": [10, 14],
-  "kpop": {
+  "opening": {
     "intro": [["C",4],["Am",4],["F",4],["G",4]],
     "hook": [[72,1],[72,0.5],[71,0.5],[69,0.5],[67,1.5],[0,4],[69,0.5],[71,0.5],[72,1],[74,2],[0,4]],
     "codaShift": 2
@@ -821,20 +849,111 @@
     chorus: panel.querySelector('[data-act="chorus"]'),
     stop: panel.querySelector('[data-act="stop"]'),
   };
-  const modeButtons = Array.from(panel.querySelectorAll(".mode"));
+  const modeButtons = Array.from(panel.querySelectorAll("[data-mode]"));
+  const voiceButtons = Array.from(panel.querySelectorAll("[data-voice]"));
   panel.hidden = false;
 
   const SPB = 60 / score.bpm;
   const ARP = [0, 1, 2, 3, 2, 3, 1, 2];
-  const KICK = { 1: [0, 10], 2: [0, 6, 10], 3: [0, 6, 10, 13] };
-  const CLAP = { 1: [8], 2: [8], 3: [8, 14] };
-  const HAT = {
-    1: [0, 2, 4, 6, 8, 10, 12, 14],
-    2: [0, 2, 4, 6, 8, 10, 12, 14, 15],
-    3: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15],
+  const EIGHTHS = [0, 2, 4, 6, 8, 10, 12, 14];
+
+  /* 발라드는 1·3박을 짚고 2·4박을 브러시로 쓸어준다.
+     K-POP은 하프타임으로 벌리고 하이햇을 잘게 썬다. */
+  const BEATS = {
+    ballad: {
+      kick: { 2: [0, 8], 3: [0, 8] }, kickGain: 0.42,
+      hit: { 3: [4, 12] }, hitVoice: "brush", hitGain: 0.2,
+      tick: { 2: EIGHTHS, 3: EIGHTHS }, tickVoice: "shaker", tickGain: 0.055,
+    },
+    kpop: {
+      kick: { 1: [0, 10], 2: [0, 6, 10], 3: [0, 6, 10, 13] }, kickGain: 0.6,
+      hit: { 1: [8], 2: [8], 3: [8, 14] }, hitVoice: "clap", hitGain: 0.28,
+      tick: {
+        1: EIGHTHS,
+        2: EIGHTHS.concat([15]),
+        3: [0, 2, 4, 6, 8, 10, 12, 13, 14, 15],
+      }, tickVoice: "hat", tickGain: 0.095,
+    },
   };
 
-  let mode = "piano";
+  const STYLES = {
+    piano: {
+      chord: "piano", melody: "warm", melodyGain: 0.2,
+      swell: null, beat: null, bass: 0, lift: false, rap: false,
+      opening: false, level: 6, wet: 0.28,
+    },
+    ballad: {
+      chord: "piano", melody: "warm", melodyGain: 0.19,
+      swell: "strings", swellGain: 0.05, beat: "ballad", bass: 0.3,
+      lift: true, rap: false, opening: true, level: 0.85, wet: 0.32,
+    },
+    kpop: {
+      chord: "rhodes", melody: "lead", melodyGain: 0.17,
+      swell: "pad", swellGain: 0.03, beat: "kpop", bass: 0.4,
+      lift: true, rap: true, opening: true, level: 0.72, wet: 0.16,
+    },
+  };
+
+  const VOICE_GAIN = 0.3;
+  let mode = "ballad";
+  let voiceOn = true;
+
+  /* ── 목소리 ───────────────────────────────────────────
+     누구의 목소리도 아닙니다. 성대 파형을 만들고 세 개의
+     공명(포먼트)으로 모음 색을 입혀 한글을 발음시킵니다. */
+
+  const VOWEL = {
+    a:  [730, 1090, 2440], ae: [590, 1900, 2550], e:  [530, 1840, 2480],
+    i:  [270, 2290, 3010], o:  [570,  840, 2410], u:  [300,  870, 2240],
+    eu: [300, 1400, 2200], eo: [640, 1190, 2390], oe: [500, 1700, 2400],
+  };
+
+  /* 중성 21자 — [미끄러져 들어오는 소리, 머무는 소리] */
+  const JUNG = [
+    ["a","a"], ["ae","ae"], ["i","a"], ["i","ae"], ["eo","eo"],
+    ["e","e"], ["i","eo"], ["i","e"], ["o","o"], ["u","a"],
+    ["u","ae"], ["oe","oe"], ["i","o"], ["u","u"], ["u","eo"],
+    ["u","e"], ["u","i"], ["i","u"], ["eu","eu"], ["eu","i"], ["i","i"],
+  ];
+
+  /* 초성 19자 — 자음의 종류 */
+  const ONSET = [
+    "velar","velar","nasal","alveolar","alveolar","liquid","nasal",
+    "labial","labial","fricative","fricative",null,"affricate",
+    "affricate","affricate","velar","alveolar","labial","breath",
+  ];
+
+  const BURST = { labial: 700, alveolar: 2600, velar: 1800 };
+  const JONG_NASAL = new Set([4, 16, 21]);   // ㄴ ㅁ ㅇ
+  const JONG_LIQUID = new Set([8]);          // ㄹ
+  const FORMANT_BW = [90, 110, 170];
+  const FORMANT_AMP = [1.0, 0.6, 0.32];
+
+  function jamo(ch) {
+    const code = ch.charCodeAt(0) - 0xAC00;
+    if (code < 0 || code >= 11172) return null;
+    return [Math.floor(code / 588), Math.floor((code % 588) / 28), code % 28];
+  }
+
+  const syllables = (text) =>
+    Array.from(text).map(jamo).filter((j) => j !== null);
+
+  /* 음절 수와 음표 수를 맞춘다 — 모자라면 쪼개고, 남으면 끌어서 부른다 */
+  function alignWords(chars, notes) {
+    const list = notes.map((n) => n.slice());
+    while (chars.length > list.length && list.length) {
+      let i = 0;
+      for (let j = 1; j < list.length; j++) if (list[j][2] > list[i][2]) i = j;
+      const [start, midi, len] = list[i];
+      list[i] = [start, midi, len / 2];
+      list.splice(i + 1, 0, [start + len / 2, midi, len / 2]);
+    }
+    return list.map(([start, midi, len], j) => ({
+      start, midi, len,
+      jam: j < chars.length ? chars[j] : chars[chars.length - 1],
+      tie: j >= chars.length,
+    }));
+  }
 
   /* 화음은 그 순간의 코드 안에서만 고른다 — 부딪히지 않게 */
   function harmonyBelow(midi, voicing) {
@@ -846,13 +965,15 @@
   }
 
   function build(from, to) {
-    const kpop = mode === "kpop";
+    const style = STYLES[mode];
+    const kit = style.beat ? BEATS[style.beat] : null;
     const notes = [];
     const marks = [];
     let beat = 0;
 
-    const add = (t, voice, midi, dur, gain) =>
-      notes.push({ t: t * SPB, voice, midi, dur: dur * SPB, gain });
+    const add = (t, voice, midi, dur, gain, extra) =>
+      notes.push(Object.assign(
+        { t: t * SPB, voice, midi, dur: dur * SPB, gain }, extra));
 
     const chords = (bars, shift, level) => {
       const map = [];
@@ -860,12 +981,12 @@
         const v = score.voicings[name].map((n) => n + shift);
         map.push({ from: beat, to: beat + span, v });
         for (let i = 0; i < Math.round(span * 2); i++) {
-          add(beat + i * 0.5, kpop ? "rhodes" : "piano",
-              v[ARP[i % ARP.length]], 0.5, i === 0 ? 0.115 : 0.075);
+          add(beat + i * 0.5, style.chord, v[ARP[i % ARP.length]],
+              0.5, i === 0 ? 0.115 : 0.075);
         }
-        if (kpop && level >= 1) add(beat, "bass", v[0] - 12, span, 0.4);
-        if (kpop && level >= 2) {
-          for (const n of v.slice(1)) add(beat, "pad", n + 12, span, 0.03);
+        if (style.bass && level >= 1) add(beat, "bass", v[0] - 12, span, style.bass);
+        if (style.swell && level >= 2) {
+          for (const n of v.slice(1)) add(beat, style.swell, n + 12, span, style.swellGain);
         }
         beat += span;
       }
@@ -873,21 +994,27 @@
     };
 
     const drums = (start, level) => {
-      for (const s of KICK[level]) add(start + s * 0.25, "kick", 0, 0.4, 0.6);
-      for (const s of CLAP[level]) add(start + s * 0.25, "clap", 0, 0.3, 0.28);
-      for (const s of HAT[level]) {
-        add(start + s * 0.25, "hat", 0, 0.12, s % 2 ? 0.055 : 0.095);
+      if (!kit) return;
+      for (const s of kit.kick[level] || []) {
+        add(start + s * 0.25, "kick", 0, 0.4, kit.kickGain);
+      }
+      for (const s of kit.hit[level] || []) {
+        add(start + s * 0.25, kit.hitVoice, 0, 0.3, kit.hitGain);
+      }
+      for (const s of kit.tick[level] || []) {
+        add(start + s * 0.25, kit.tickVoice, 0, 0.12,
+            s % 2 ? kit.tickGain * 0.6 : kit.tickGain);
       }
     };
 
-    if (kpop) {
+    if (style.opening) {
       const head = beat;
-      chords(score.kpop.intro, 0, 1);
+      chords(score.opening.intro, 0, 1);
       for (let b = 0; b < 4; b++) drums(head + b * 4, 1);
-      let c = head;
-      for (const [midi, len] of score.kpop.hook) {
-        if (midi > 0) add(c, "lead", midi, len, 0.16);
-        c += len;
+      let cursor = head;
+      for (const [midi, len] of score.opening.hook) {
+        if (midi > 0) add(cursor, style.melody, midi, len, style.melodyGain);
+        cursor += len;
       }
     } else {
       chords(score.intro, 0, 0);
@@ -895,29 +1022,54 @@
 
     for (let i = from; i <= to; i++) {
       const line = score.lines[i];
-      if (!kpop && line.rap) continue;
-      const shift = kpop && line.k ? line.k : 0;
-      const level = kpop ? line.i : 0;
+      if (!style.rap && line.rap) continue;
+      const shift = style.lift && line.k ? line.k : 0;
+      const level = line.i;
       const head = beat;
       marks.push({ el: lineEls[i], t: head * SPB });
       const map = chords(line.b, shift, level);
-      if (level >= 1) { drums(head, level); drums(head + 4, level); }
+      drums(head, level);
+      drums(head + 4, level);
+
+      const laid = [];
       let cursor = head;
       for (const [midi, len] of score.mel[line.m]) {
-        if (midi > 0) {
-          const n = midi + shift;
-          add(cursor, kpop ? "lead" : "piano", n, len, kpop ? 0.17 : 0.2);
-          if (kpop && level >= 3) {
-            const slot = map.find((m) => cursor >= m.from && cursor < m.to) || map[0];
-            const h = harmonyBelow(n, slot.v);
-            if (h) add(cursor, "harm", h, len, 0.055);
+        if (midi > 0) laid.push([cursor, midi, len]);
+        cursor += len;
+      }
+      const under = (t) => (map.find((m) => t >= m.from && t < m.to) || map[0]).v;
+      const chars = voiceOn ? syllables(lineEls[i].textContent) : [];
+
+      if (voiceOn && laid.length && chars.length) {
+        for (const w of alignWords(chars, laid)) {
+          const n = w.midi + shift;
+          add(w.start, "sing", n, w.len, VOICE_GAIN, { jam: w.jam, tie: w.tie });
+          if (level >= 3) {
+            const h = harmonyBelow(n, under(w.start));
+            if (h) add(w.start, "sing", h, w.len, VOICE_GAIN * 0.3,
+                       { jam: w.jam, tie: true });
           }
         }
-        cursor += len;
+      } else if (voiceOn && !laid.length && chars.length) {
+        /* 가락 없는 줄 — 읊조리듯 */
+        const step = Math.min(0.5, 7 / chars.length);
+        chars.forEach((jam, j) => {
+          add(head + 0.5 + j * step, "sing", 55 + shift - Math.floor(j / 8),
+              step * 0.9, VOICE_GAIN * 0.75, { jam, tie: false });
+        });
+      } else {
+        for (const [start, midi, len] of laid) {
+          const n = midi + shift;
+          add(start, style.melody, n, len, style.melodyGain);
+          if (style.swell && level >= 3) {
+            const h = harmonyBelow(n, under(start));
+            if (h) add(start, "harm", h, len, style.melodyGain * 0.35);
+          }
+        }
       }
     }
 
-    chords(score.coda, kpop ? score.kpop.codaShift : 0, 0);
+    chords(score.coda, style.lift ? score.opening.codaShift : 0, 0);
     return { notes, marks, length: beat * SPB };
   }
 
@@ -975,11 +1127,11 @@
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(gain, t + attack);
     g.gain.setValueAtTime(gain, t + hold);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + hold + 0.28);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + hold + 0.3);
 
     osc.connect(g).connect(lp).connect(master);
     osc.start(t);
-    osc.stop(t + hold + 0.35);
+    osc.stop(t + hold + 0.4);
 
     if (vibrato) {
       const lfo = ctx.createOscillator();
@@ -989,19 +1141,19 @@
       depth.gain.linearRampToValueAtTime(7, t + Math.min(0.45, hold));
       lfo.connect(depth).connect(osc.detune);
       lfo.start(t);
-      lfo.stop(t + hold + 0.35);
+      lfo.stop(t + hold + 0.4);
     }
   }
 
-  function pad(freq, t, dur, gain) {
+  function bowed(freq, t, dur, gain, cutoff, attack) {
     const lp = ctx.createBiquadFilter();
     lp.type = "lowpass";
-    lp.frequency.value = 1100;
+    lp.frequency.value = cutoff;
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(gain, t + 0.7);
-    g.gain.setValueAtTime(gain, t + Math.max(dur, 0.8));
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.7);
+    g.gain.exponentialRampToValueAtTime(gain, t + attack);
+    g.gain.setValueAtTime(gain, t + Math.max(dur, attack + 0.1));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + attack);
     g.connect(lp).connect(master);
     for (const cents of [-7, 7]) {
       const osc = ctx.createOscillator();
@@ -1010,7 +1162,7 @@
       osc.detune.value = cents;
       osc.connect(g);
       osc.start(t);
-      osc.stop(t + dur + 0.8);
+      osc.stop(t + dur + attack + 0.2);
     }
   }
 
@@ -1042,6 +1194,98 @@
     osc.stop(t + 0.4);
   }
 
+  /* 자음 하나. 모음이 시작될 시각을 돌려준다. */
+  function consonant(kind, t, formants, freq, gain) {
+    if (!kind) return t;
+    if (kind === "labial" || kind === "alveolar" || kind === "velar") {
+      hiss(t + 0.028, 0.014, gain * 0.55, "bandpass", BURST[kind], 1.4);
+      return t + 0.042;
+    }
+    if (kind === "affricate") {
+      hiss(t + 0.022, 0.06, gain * 0.35, "bandpass", 3600, 1.0);
+      return t + 0.082;
+    }
+    if (kind === "fricative") {
+      hiss(t, 0.085, gain * 0.34, "highpass", 4600, 0.7);
+      return t + 0.085;
+    }
+    if (kind === "breath") {
+      hiss(t, 0.055, gain * 0.4, "bandpass", 1500, 0.6);
+      return t + 0.055;
+    }
+    if (kind === "nasal") { hum(t, 0.06, freq, gain * 0.5); return t + 0.06; }
+    if (kind === "liquid") { hum(t, 0.032, freq, gain * 0.5, 420); return t + 0.032; }
+    return t;
+  }
+
+  /* 코와 입술에서 나는 울림 — ㄴ ㅁ ㅇ ㄹ */
+  function hum(t, dur, freq, gain, f1) {
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.value = freq;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "lowpass";
+    bp.frequency.value = f1 || 300;
+    bp.Q.value = 3;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.02);
+    osc.connect(bp).connect(g).connect(master);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  }
+
+  /* 음절 하나를 그 높이로 부른다 */
+  function singNote(t, dur, freq, jam, gain, tie) {
+    if (!jam) return;
+    const [cho, jung, jong] = jam;
+    const [glide, steady] = JUNG[jung];
+    const fa = VOWEL[glide], fb = VOWEL[steady];
+    const start = tie ? t : consonant(ONSET[cho], t, fb, freq, gain);
+    const span = Math.max(t + dur - start, 0.07);
+
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(freq * (tie ? 1 : 0.955), start);
+    osc.frequency.exponentialRampToValueAtTime(freq, start + 0.06);
+
+    const lfo = ctx.createOscillator();
+    const depth = ctx.createGain();
+    lfo.frequency.value = 5.4;
+    depth.gain.setValueAtTime(0, start);
+    depth.gain.linearRampToValueAtTime(10, start + Math.min(0.5, span));
+    lfo.connect(depth).connect(osc.detune);
+
+    const sum = ctx.createGain();
+    for (let k = 0; k < 3; k++) {
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.setValueAtTime(fa[k], start);
+      bp.frequency.linearRampToValueAtTime(fb[k], start + Math.min(0.09, span));
+      bp.Q.value = fb[k] / FORMANT_BW[k];
+      const g = ctx.createGain();
+      g.gain.value = FORMANT_AMP[k];
+      osc.connect(bp).connect(g).connect(sum);
+    }
+
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, start);
+    env.gain.exponentialRampToValueAtTime(gain, start + 0.022);
+    env.gain.setValueAtTime(gain, start + Math.max(span - 0.05, 0.05));
+    env.gain.exponentialRampToValueAtTime(0.0001, start + span + 0.05);
+    sum.connect(env).connect(master);
+
+    osc.start(start); osc.stop(start + span + 0.1);
+    lfo.start(start); lfo.stop(start + span + 0.1);
+
+    if (JONG_NASAL.has(jong) && span > 0.18) {
+      hum(start + span - 0.07, 0.07, freq, gain * 0.45);
+    } else if (JONG_LIQUID.has(jong) && span > 0.18) {
+      hum(start + span - 0.05, 0.05, freq, gain * 0.4, 420);
+    }
+  }
+
   function hiss(t, dur, gain, type, freq, q) {
     const src = ctx.createBufferSource();
     src.buffer = noise;
@@ -1052,7 +1296,7 @@
     f.Q.value = q;
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(gain, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.004);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     src.connect(f).connect(g).connect(master);
     src.start(t);
@@ -1064,16 +1308,21 @@
     switch (note.voice) {
       case "piano": struck(hz(note.midi), t, note.dur, note.gain, 2600, 0.55, 0.22); break;
       case "rhodes": struck(hz(note.midi), t, note.dur, note.gain, 1500, 0.9, 0.45); break;
+      case "warm": sung(hz(note.midi), t, note.dur, note.gain, 1500, 0.085, true); break;
       case "lead": sung(hz(note.midi), t, note.dur, note.gain, 1900, 0.045, true); break;
-      case "harm": sung(hz(note.midi), t, note.dur, note.gain, 1300, 0.07, false); break;
-      case "pad": pad(hz(note.midi), t, note.dur, note.gain); break;
+      case "harm": sung(hz(note.midi), t, note.dur, note.gain, 1300, 0.09, false); break;
+      case "strings": bowed(hz(note.midi), t, note.dur, note.gain, 1500, 1.0); break;
+      case "pad": bowed(hz(note.midi), t, note.dur, note.gain, 1100, 0.7); break;
+      case "sing": singNote(t, note.dur, hz(note.midi), note.jam, note.gain, note.tie); break;
       case "bass": lowEnd(hz(note.midi), t, note.dur, note.gain); break;
       case "kick": thump(t, note.gain); break;
       case "clap":
         hiss(t, 0.13, note.gain, "bandpass", 1700, 1.1);
         hiss(t + 0.014, 0.19, note.gain * 0.7, "bandpass", 1300, 0.9);
         break;
+      case "brush": hiss(t, 0.22, note.gain, "bandpass", 2400, 0.5); break;
       case "hat": hiss(t, 0.045, note.gain, "highpass", 7800, 0.7); break;
+      case "shaker": hiss(t, 0.07, note.gain, "highpass", 5600, 0.6); break;
     }
   }
 
@@ -1147,13 +1396,22 @@
 
   function play(from, to) {
     stop();
+    const style = STYLES[mode];
     ctx = new AudioCtor();
     master = ctx.createGain();
-    master.gain.value = mode === "kpop" ? 0.72 : 0.9;
+    master.gain.value = voiceOn ? style.level * 0.8 : style.level;
+    /* 목소리가 겹치는 자리에서 깨지지 않도록 */
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -8;
+    limiter.knee.value = 8;
+    limiter.ratio.value = 12;
+    limiter.attack.value = 0.004;
+    limiter.release.value = 0.25;
     const wet = ctx.createGain();
-    wet.gain.value = mode === "kpop" ? 0.16 : 0.26;
-    master.connect(ctx.destination);
-    master.connect(room()).connect(wet).connect(ctx.destination);
+    wet.gain.value = style.wet;
+    limiter.connect(ctx.destination);
+    master.connect(limiter);
+    master.connect(room()).connect(wet).connect(limiter);
     noise = whiteNoise();
 
     plan = build(from, to);
@@ -1182,15 +1440,27 @@
   acts.chorus.addEventListener("click", () => play(score.chorus[0], score.chorus[1]));
   acts.stop.addEventListener("click", stop);
 
+  function group(buttons, isCurrent) {
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        if (isCurrent(button)) return;
+        stop();
+        button.dispatchEvent(new CustomEvent("pick", { bubbles: false }));
+        for (const other of buttons) {
+          other.setAttribute("aria-pressed", String(other === button));
+        }
+      });
+    }
+  }
+
+  group(modeButtons, (b) => b.dataset.mode === mode);
   for (const button of modeButtons) {
-    button.addEventListener("click", () => {
-      if (button.dataset.mode === mode) return;
-      stop();
-      mode = button.dataset.mode;
-      for (const other of modeButtons) {
-        other.setAttribute("aria-pressed", String(other.dataset.mode === mode));
-      }
-    });
+    button.addEventListener("pick", () => { mode = button.dataset.mode; });
+  }
+
+  group(voiceButtons, (b) => (b.dataset.voice === "on") === voiceOn);
+  for (const button of voiceButtons) {
+    button.addEventListener("pick", () => { voiceOn = button.dataset.voice === "on"; });
   }
 
   window.addEventListener("pagehide", stop);
