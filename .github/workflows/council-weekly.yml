@@ -1,0 +1,113 @@
+name: 원탁회의 주간 회차
+
+# 지속적인 루프의 한 가지 구현. 매주 대기열 맨 위 의제로 회차를 돌리고,
+# 결과와 갱신된 쟁점 대장을 PR로 올립니다.
+#
+# ── 켜기 전에 필요한 것 ────────────────────────────────────────────────
+# 1. 저장소 Settings → Secrets → Actions 에 ANTHROPIC_API_KEY 등록
+# 2. Settings → Actions → General → Workflow permissions 에서
+#    "Read and write permissions" + "Allow GitHub Actions to create pull requests"
+# 3. context/author-position.md 에 칼럼 붙여넣기
+# 4. context/briefing-facts.md 의 F-01~F-12 확인 (☐ → ☑)
+#
+# 4번을 건너뛰면 검증되지 않은 숫자 위에서 회의가 돌아갑니다.
+# 그래서 schedule 트리거는 기본적으로 주석 처리돼 있습니다 —
+# 준비가 끝나면 주석을 푸십시오. workflow_dispatch(수동 실행)는 지금도 됩니다.
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "의제 (비우면 topics/queue.md 맨 위 항목)"
+        required: false
+        type: string
+      seats:
+        description: "참석자 id 쉼표 구분 (비우면 기본 9인), 또는 all"
+        required: false
+        type: string
+  # schedule:
+  #   # 매주 월요일 09:00 KST = 일요일 00:00 UTC
+  #   - cron: "0 0 * * 0"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: council-session
+  cancel-in-progress: false
+
+jobs:
+  session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: health-policy-council
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 의존성 설치
+        run: pip install -r harness/requirements.txt
+
+      - name: 페르소나·설정 검증
+        run: python3 harness/council.py validate
+
+      - name: 의제 결정
+        id: topic
+        env:
+          INPUT_TOPIC: ${{ inputs.topic }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_TOPIC:-}" ]; then
+            TOPIC="$INPUT_TOPIC"
+          else
+            # 대기열의 첫 미완료 항목: "- [ ] **A1.** 본문" → "본문"
+            TOPIC=$(grep -m1 '^- \[ \]' topics/queue.md \
+                    | sed -E 's/^- \[ \] \*\*[A-Z0-9]+\.\*\* //')
+          fi
+          if [ -z "$TOPIC" ]; then
+            echo "::error::의제를 찾지 못했습니다. topics/queue.md에 미완료 항목이 없습니다."
+            exit 1
+          fi
+          echo "선택된 의제: $TOPIC"
+          echo "topic=$TOPIC" >> "$GITHUB_OUTPUT"
+
+      - name: 회차 실행
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          python3 harness/council.py run \
+            --topic "${{ steps.topic.outputs.topic }}" \
+            ${{ inputs.seats && format('--seats {0}', inputs.seats) || '' }}
+
+      - name: 결과 PR 생성
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: council/session-${{ github.run_number }}
+          commit-message: "회차 기록: ${{ steps.topic.outputs.topic }}"
+          title: "원탁회의 회차 — ${{ steps.topic.outputs.topic }}"
+          add-paths: |
+            health-policy-council/sessions/**
+          body: |
+            자동 실행된 원탁회의 회차입니다.
+
+            **의제:** ${{ steps.topic.outputs.topic }}
+
+            ### 병합 전에 할 일
+
+            - [ ] `brief.md`를 읽는다
+            - [ ] 「검증 필요 목록」의 항목을 실제로 확인하고, 확인된 것은
+                  `context/briefing-facts.md`로 올린다
+            - [ ] 「쟁점 대장 갱신 지시」를 `ledger/issue-ledger.md`에 반영한다
+                  (**이걸 빠뜨리면 다음 회차가 같은 회의를 반복합니다**)
+            - [ ] `topics/queue.md`에서 이 의제를 완료로 옮긴다
+
+            마지막 세 가지는 이 PR에 커밋이 포함돼 있지 않습니다 —
+            사람이 판단해야 하는 부분이라 일부러 자동화하지 않았습니다.

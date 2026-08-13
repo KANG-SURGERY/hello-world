@@ -1,0 +1,35 @@
+# 원탁회의 하네스 설정
+#
+# 값을 바꾸면 다음 회차부터 적용됩니다. 회차 리포트에 실제 사용된 모델이
+# 기록되므로, 설정을 바꾼 뒤의 결과는 이전 회차와 직접 비교하지 마십시오.
+
+models:
+  # 페르소나 12명 × 3라운드 = 최대 36회 호출이라 여기서 비용이 결정됩니다.
+  persona: claude-sonnet-5
+  # 사회자와 레드팀은 회의 전체를 읽고 판정해야 하므로 상위 모델을 씁니다.
+  # 이 두 자리를 낮추면 산출물의 질이 눈에 띄게 떨어집니다.
+  moderator: claude-opus-5
+  red_team: claude-opus-5
+
+effort:
+  persona: medium
+  moderator: high
+  red_team: high
+
+max_tokens:
+  persona: 4000
+  moderator: 16000
+  red_team: 12000
+
+# 동시 호출 수. 조직 rate limit에 걸리면 낮추세요.
+max_concurrency: 5
+
+# 필자 칼럼을 프롬프트에 넣는 방식:
+#   full     — context/author-position.md 전체 (기본)
+#   summary  — 「요약」 절만. 칼럼이 길 때 사용
+author_position: full
+
+# 사회자가 9절에서 출력할 쟁점 대장 표 헤더. ledger/issue-ledger.md와 반드시 일치시키세요.
+ledger_header: |
+  | # | 쟁점 | 대립 축 (명제) | 판정 가능성 | 상태 | 최초 회차 | 최근 갱신 |
+  |---|---|---|---|---|---|---|

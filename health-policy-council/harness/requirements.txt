@@ -1,0 +1,10 @@
+# 하네스 의존성
+#
+#   python3 -m venv .venv && source .venv/bin/activate
+#   pip install -r harness/requirements.txt
+#
+# validate / facts / topics / agents / run --dry-run 은 PyYAML만 있으면 동작합니다.
+# 실제 회차 실행(run)에만 anthropic SDK와 API 키가 필요합니다.
+
+PyYAML>=6.0
+anthropic>=0.116

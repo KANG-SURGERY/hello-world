@@ -4,9 +4,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 현재 상태
 
-이 디렉토리(`PROJECTsenior`)는 `github.com/KANG-SURGERY/hello-world` 저장소의 클론이며, 추적 파일은 `README.md`(`# hello-world`)뿐입니다. 빌드 시스템은 없습니다.
+이 디렉토리(`PROJECTsenior`)는 `github.com/KANG-SURGERY/hello-world` 저장소의 클론입니다. 추적 대상은 `README.md`와 아래 `health-policy-council/`입니다. 저장소 전역 빌드 시스템은 없습니다.
 
 > **중요:** 하위의 `rectal-cancer/`는 **이 저장소의 일부가 아니라 별도의 독립 git 저장소**(`github.com/KANG-SURGERY/rectal-cancer`, Private)입니다. 물리적으로만 이 작업 트리 안에 중첩돼 있어, hello-world의 `.gitignore`가 `rectal-cancer/`를 제외합니다. `rectal-cancer/` 안에서 git 작업을 하면 그 폴더의 `.git`(별도 저장소)에 적용됩니다.
+
+## `health-policy-council/` — 의료정책 원탁회의 (Python, 이 저장소의 일부)
+
+한국 의료정책 의제를 여러 이해관계자 페르소나로 토론시켜 **쟁점 지도와 반론**을 산출하는 시스템. 사용자의 한겨레 「왜냐면」 칼럼이 상설 안건으로 들어가 있고, 매 회차 그 칼럼에 대한 가장 강한 반론 3개를 산출합니다. 자세한 설계 의도와 한계는 `health-policy-council/README.md`.
+
+```
+health-policy-council/
+├── personas/        13명의 이해관계자 YAML (+ _schema.md 작성 규격)
+├── roles/           moderator.md · red-team.md (참석자가 아닌 진행/공격 역할)
+├── context/         ground-rules.md · briefing-facts.md · author-position.md
+├── ledger/          issue-ledger.md — 누적 쟁점 = 이 시스템의 기억
+├── topics/queue.md  의제 대기열
+├── sessions/        회차별 산출물 (report.md · brief.md)
+├── harness/         Python 하네스
+└── council.yaml     모델·effort·동시성 설정
+```
+
+**명령** (`health-policy-council/` 안에서):
+
+```bash
+pip install -r harness/requirements.txt
+python3 harness/council.py validate        # 페르소나·설정 검증 (API 키 불필요)
+python3 harness/council.py facts           # 브리핑 팩 검증 상태
+python3 harness/council.py agents          # .claude/agents/ 서브에이전트 재생성
+python3 harness/council.py run --topic "..." --dry-run   # 프롬프트만 생성
+python3 harness/council.py run --topic "..."             # 회차 실행 (ANTHROPIC_API_KEY 필요)
+```
+
+- Claude Code 경로: `/council <의제>` — API 키 없이 서브에이전트로 실행됩니다(`.claude/skills/council/`).
+- 두 경로가 **같은 `personas/*.yaml`을 읽습니다.** 페르소나를 고치면 `council.py agents`로 서브에이전트를 재생성하세요.
+- **`context/briefing-facts.md`는 검증 전 초안입니다.** 숫자가 틀리면 회의 전체가 오염되므로, 인용하기 전에 원출처와 대조하십시오.
+- 회차가 끝나면 `ledger/issue-ledger.md` 갱신이 필수입니다. 빠뜨리면 다음 회차가 같은 쟁점을 반복합니다.
+- 테스트·린터는 아직 없습니다. `council.py validate`가 사실상의 스모크 테스트 역할을 합니다.
 
 ## `rectal-cancer/` — 직장암 환자 데이터 분석 (Python, 별도 저장소)
 
